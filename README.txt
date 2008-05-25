@@ -5,7 +5,7 @@ Views Datasource README
 
 Current Version
 ---------------
-6.x-0.1-dev
+6.x-1.0-ALPHA1
 
 Release Notes
 -------------
