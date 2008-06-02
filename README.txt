@@ -5,17 +5,17 @@ Views Datasource README
 
 Current Version
 ---------------
-6.x-0.1-dev
+5.x-1.0-ALPHA1
 
 Release Notes
 -------------
 CVS module created and intial code uploaded to repository. This is a 
-proof-of-concept release with a working views_json plugin for Drupal 6. In the
-Views interface simply select the view style as JSON data document (Exhibit 
-format only) and the row style as Unformatted (separator must be |). Because the
-template changes the page Content-type to text/javascript and immediately exits 
-Drupal, the live preview will throw an error. This can be ignored; just save 
-your view as a page and view it normally at the URL to get the JSON output.
+proof-of-concept release with working views_json and views_xml for Drupal 5. 
+In the Views interface simply select the view type as Views JSON: MIT 
+Simile/Exhibit JSON data document, Views XML: Raw XML data document, or 
+Views XML: OPML XML data document. For an existing view you can add arguments
+with the same names as above to get an icon on your view page to access the XML
+or JSON rendering of your view, similar to how the RSS feed argument works.
 
 About
 -----
@@ -29,7 +29,7 @@ from node lists created in Drupal Views as:
   3)JSON data documents in a format like MIT Simile/Exhibit JSON;
   4)XHTML data documents using a microformat like hCard
   
-The project consists of 4 Views style plugins (and related row plugins):
+The project consists of 4 Views style plugins:
   1)views_xml - Output as raw XML, OPML, and Atom;
   2)views_json - Output as Simile/Exhibit JSON, canonical JSON, JSONP;
   3)views_rdf - Output as FOAF, SIOC and DOAP;
