@@ -1,0 +1,5 @@
+; $Id $
+name = Views XML
+description = "Views style plugin to render node content as XML."
+package = Views
+dependencies = views
