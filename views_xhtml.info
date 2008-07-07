@@ -1,0 +1,6 @@
+; $Id$
+name = Views XHTML
+description = "Views style plugin to render node content in XHTML microformats."
+package = Views
+core = 6.x
+dependencies[] = views
