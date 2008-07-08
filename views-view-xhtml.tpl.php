@@ -72,6 +72,8 @@ function xhtml_hcard_render($nodes, $view) {
 
       $label = views_xhtml_strip_illegal_chars($nodefieldarray[0]);
       $value = views_xhtml_strip_illegal_chars(views_xhtml_is_date($nodefieldarray[1]));
+      if (strtotime($value))
+        $value = date(DATE_ISO8601, strtotime($value));
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
       if (is_null($value) || ($value === '')) continue;
       

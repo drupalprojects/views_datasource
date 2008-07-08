@@ -31,3 +31,17 @@ function views_rdf_strip_illegal_chars($input) {
   $output = str_replace('>', '&rt;', $output); //encode right-angled bracket
   return $output;
 }
+
+/**
+ * If input is a serialized date array, return a date string 
+ *
+ * @param unknown_type $input
+ * @return unknown
+ */
+function views_rdf_is_date ($input) {
+  if (strpos($input, 'a:3:{s:5:"month"') !== 0) return $input; 
+  else { //serialized date array
+    $date = unserialize($input);
+    return date(DATE_ISO8601, mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));
+  }
+}

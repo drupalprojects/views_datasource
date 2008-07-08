@@ -2,7 +2,7 @@
 // $Id$
 /**
  * @file views-view-rdf.tpl.php
- * View template to render views as RDF. Supports RDF.
+ * View template to render views as RDF. Supports FOAF vocabulary.
  *
  * - $view: The view in use.
  * - $rows: The raw result objects from the query, with all data it fetched.
@@ -46,7 +46,9 @@ function rdf_foaf_xml_render($nodes, $view) {
       $nodefieldarray[1] = str_replace('#colon#', ':', $nodefieldarray[1]);
 
       $label = views_rdf_strip_illegal_chars($nodefieldarray[0]);
-      $value = views_rdf_strip_illegal_chars($nodefieldarray[1]);
+      $value = views_rdf_strip_illegal_chars(views_rdf_is_date($nodefieldarray[1]));
+      if (strtotime($value))
+        $value = date(DATE_ISO8601, strtotime($value));
       if (is_null($value) || ($value === '')) continue;
       if (stripos($label, 'firstname') !== false) {
         $xml.="  <foaf:firstName>$value</foaf:firstName>\n";

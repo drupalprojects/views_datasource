@@ -1,6 +1,6 @@
 ; $Id$
 name = Views RDF
-description = "Views style plugin to render node content as RDF"
+description = "Views style plugin to render node content as RDF."
 package = Views
 core = 6.x
 dependencies[] = views

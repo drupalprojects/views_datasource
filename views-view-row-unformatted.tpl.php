@@ -1,5 +1,5 @@
 <?php
-// $Id $
+// $Id$
 /**
  * @file views-view-row-unformatted.tpl.php
  * Simple view template to view unformatted fields from the views query.
@@ -25,9 +25,12 @@
 //foreach ($fields as $id => $field)  
 // print $id.":".$field->content."\n";
 
-$field_separator = filter_xss_admin($options['separator']);
-foreach($row as $field_label => $field_value) 
-  $row_unformatted.=  $field_label.":".(!is_null($field_value) ? $field_value: "").$field_separator;
+$field_separator = filter_xss($options['separator']);
+foreach($row as $field_label => $field_value) { 
+  $label = str_replace(':', '#colon#', $field_label);
+  $value = filter_xss(str_replace(':', '#colon#', $field_value));
+  $row_unformatted.=  $label.":".(!is_null($value) ? $value : "").$field_separator;
+}
 print rtrim($row_unformatted, $field_separator).PHP_EOL;
 
   

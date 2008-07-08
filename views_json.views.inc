@@ -1,5 +1,5 @@
 <?php
-//$Id $
+//$Id$
 /**
  * @file views_json.views.inc 
  * Views style plugin to render nodes in the JSON data format.
@@ -50,7 +50,7 @@ class views_plugin_style_json extends views_plugin_style {
    * Set default options
    */
   function options(&$options) {
-    $options['format'] = 'Exhibit';
+    $options['format'] = 'Simple';
   }
   
   /**
@@ -63,7 +63,7 @@ class views_plugin_style_json extends views_plugin_style {
     $form['format'] = array(
       '#type' => 'radios',
       '#title' => t('JSON data format'),
-      '#options' => array('Exhibit' => t('MIT Simile/Exhibit'), 'Canonical' => t('Canonical'), 'JSONP' => t('JSONP')),
+      '#options' => array('Simple' => t('Simple'), 'Exhibit' => t('MIT Simile/Exhibit')),
       '#default_value' => $this->options['format'],
     );
   }
@@ -129,7 +129,7 @@ function template_preprocess_views_view_row_unformatted(&$vars) {
   //print('preprocess');
   // Loop through the fields for this view.
   foreach ($view->field as $id => $field) {
-    if (!empty($field['handler']) && is_object($field['handler'])) {
+    if (!empty($field->handler) && is_object($field->handler)) {
       $object = new stdClass();
       $object->content = $field['handler']->theme($vars['row']);
       if (isset($field['handler']->field_alias) && isset($vars['row']->{$field['handler']->field_alias})) {
@@ -139,7 +139,7 @@ function template_preprocess_views_view_row_unformatted(&$vars) {
         $object->raw = NULL; // make sure it exists to reduce NOTICE
       }
       if (!empty($vars['options']['separator']) && $object->content) {
-        $object->separator = filter_xss_admin($vars['options']['separator']);
+        $object->separator = filter_xss($vars['options']['separator']);
       }
 
       $object->handler = $field['handler'];

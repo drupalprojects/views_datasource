@@ -39,6 +39,8 @@ function xml_raw_render($nodes, $view) {
 
       $label = views_xml_strip_illegal_chars($nodefieldarray[0]);
       $value = views_xml_strip_illegal_chars(views_xml_is_date($nodefieldarray[1]));
+      if (strtotime($value))
+        $value = date(DATE_ISO8601, strtotime($value));
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
       if (is_null($value) || ($value === '')) continue;
       $xml .= "    <$label>$value</$label>\n";
