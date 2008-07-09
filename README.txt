@@ -55,4 +55,15 @@ The project consists of 4 Views style plugins (and related row plugins):
   1)views_xml - Output as raw XML, OPML, and Atom;
   2)views_json - Output as Simile/Exhibit JSON, canonical JSON, JSONP;
   3)views_rdf - Output as FOAF, SIOC and DOAP;
-  4)views_xhtml - Output as hCard, hCalendar, and Geo. 
+  4)views_xhtml - Output as hCard, hCalendar, and Geo.
+  
+To use these plugins you should:
+1) Enable all four modules;
+2) Set the row style plugin for your view to Unformatted;
+3) In the Unformatted row style plugin options set the separator to "|" (it is 
+   set to this by default.)
+4) Set the view style plugin to one of:
+   i)  JSON data document
+   ii) XML data document
+   iii) RDF data document
+   iv) XHTML data document

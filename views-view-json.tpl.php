@@ -12,25 +12,19 @@
  * @see views_json.views.inc
  */
  
+if (get_class($view->style_plugin->row_plugin) !== 'views_plugin_row_unformatted') {
+  print ('<b style="color:red">The row plugin is not of type Unformatted.</b>');
+  return;
+}
+else if (($view->style_plugin->row_plugin->options['separator']) !== '|') {
+  print ('<b style="color:red">The row plugin separator is not "<span style="color:blue">|</span>" (you can set this in the options for the row style plugin.)</b>');
+  return;
+}
+
 $items = array();
 foreach($rows as $row) {
-//  print_r($row).EOL;
   $items[] = explode("|", trim($row));
-  
-}
-if (count($items) != count($rows))
-  return ("Did not get all rows (is the field separator '|' ?)"); 
-//print_r($items);
-//foreach ($items as $item) { 
-//  print_r($item).PHP_EOL;
-//	foreach($item as $itemfield) {
-//		print($itemfield);
-//		$itemfieldarray = explode(":", $itemfield);
-//		print_r($itemfieldarray).PHP_EOL;
-//		$label = $itemfieldarray[0]; $value=$itemfieldarray[1];
-//		print $label." : ".$value;
-//	}
-//}
+  }
 
 if ($options['format'] == 'Simple') json_simple_render($items, $view);
 if ($options['format'] == 'Exhibit') json_exhibit_render($items, $view);

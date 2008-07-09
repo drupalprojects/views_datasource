@@ -11,14 +11,21 @@
  * @ingroup views_templates
  * @see views_xml.views.inc
  */
- 
+
+if (get_class($view->style_plugin->row_plugin) !== 'views_plugin_row_unformatted') {
+  print ('<b style="color:red">The row plugin is not of type Unformatted.</b>');
+  return;
+}
+else if (($view->style_plugin->row_plugin->options['separator']) !== '|') {
+  print ('<b style="color:red">The row plugin separator is not "<span style="color:blue">|</span>" (you can set this in the options for the row style plugin.)</b>');
+  return;
+}
+
 $nodes = array();
 foreach($rows as $row) {
   $nodes[] = explode("|", trim($row));
   
 }
-if (count($nodes) != count($rows))
-  return ("Did not get all rows (is the field separator '|' ?)");
 
 if ($options['schema'] == 'raw') xml_raw_render($nodes, $view);
 if ($options['schema'] == 'opml') xml_opml_render($nodes, $view);
