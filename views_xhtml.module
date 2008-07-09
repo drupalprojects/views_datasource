@@ -2,7 +2,7 @@
 //$Id$
 /**
  * @file
- * Provides Views plugin for rendering node content as XHTML.
+ * Provides Views plugin for rendering node content as XHTML microformats.
  */
 
 /**
@@ -92,14 +92,14 @@ function views_xhtml_hCard_render($vid, $nodes, $type) {
   $view = views_load_view($vid);
   $fields = _views_get_fields();
   $xhtml = "\r\n";
-  //$xhtml .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'."\n";
-  //$xhtml .= '<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr"'.">\r\n";
-  //$xhtml .= '<head>'."\r\n";
-  //$xhtml .= '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'."\r\n";
-  //$xhtml .= '  <meta name="KEYWORDS" content="hCards" />'."\r\n";
-  //$xhtml .= '  <title>hCards</title>'."\r\n";
-  //$xhtml .= '</head>'."\r\n";
-  //$xhtml .= '<body>'."\r\n";
+  $xhtml .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'."\n";
+  $xhtml .= '<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr"'.">\r\n";
+  $xhtml .= '<head>'."\r\n";
+  $xhtml .= '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'."\r\n";
+  $xhtml .= '  <meta name="KEYWORDS" content="hCards" />'."\r\n";
+  $xhtml .= '  <title>hCards</title>'."\r\n";
+  $xhtml .= '</head>'."\r\n";
+  $xhtml .= '<body>'."\r\n";
   foreach ($nodes as $node) {
     $hcard = array('adr'=> array(
                            'type' => '', 
@@ -136,8 +136,8 @@ function views_xhtml_hCard_render($vid, $nodes, $type) {
       if ($fields[$field['id']]['visible'] !== false) {
         $label = $field['label'] ? $field['label'] : $fields[$field['fullname']]['name'];
         /*strip illegal XML characters*/
-        $label = strip_illegal_xml_chars($label);
-        $value = strip_illegal_xml_chars(views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $node, $view));
+        $label = views_xhtml_strip_illegal_chars($label);
+        $value = views_xhtml_strip_illegal_chars(views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $node, $view));
         if ($value == '') continue;
         if (stripos($label, 'address-type') !== FALSE) {
         	$hcard['adr']['type'] = $value;	
@@ -303,23 +303,23 @@ function views_xhtml_hCard_render($vid, $nodes, $type) {
     }    
     $xhtml .= '</div>'."\r\n";
   }
-  //$xhtml.='</body>'."\r\n";
-  //$xhtml.='</html>'."\r\n";
-  //drupal_set_header('Content-Type: text/xml');
+  $xhtml.='</body>'."\r\n";
+  $xhtml.='</html>'."\r\n";
+  drupal_set_header('Content-Type: text/html');
   //var_dump($view);
-  //print $xhtml;
-  //module_invoke_all('exit');
-  //exit;
-  return $xhtml;
+  print $xhtml;
+  module_invoke_all('exit');
+  exit;
+  //return $xhtml;
 }
 
 /**
  * Strips illegal Unicode characters and encodes entities in string
  *
- * @param string $string
+ * @param string $input
  * @return string
  */
-function views_xhtml_strip_illegal_xml_chars($string) {
+function views_xhtml_strip_illegal_chars($input) {
   $output = preg_replace('/[\x{80}-\x{A0}'. // Non-printable ISO-8859-1 + NBSP
         '\x{01}-\x{1F}'. //Non-printable ASCII characters
         '\x{AD}'. // Soft-hyphen
@@ -330,7 +330,7 @@ function views_xhtml_strip_illegal_xml_chars($string) {
         '\x{FF01}-\x{FF60}'. // Full-width latin
         '\x{FFF9}-\x{FFFD}'. // Replacement characters
         '\x{0}]/u', // NULL byte
-        '', $string);
+        '', $input);
   $output = str_replace('"', '&quot;', $output); //encode quote
   $output = str_replace('&', '&amp;', $output); //encode ampersand
   $output = str_replace("'", '&pos;', $output); //encode apostrophe
