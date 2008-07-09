@@ -201,7 +201,7 @@ function views_json_exhibit_render($vid, $nodes, $type) {
       if (strtotime($value))
         $value = date(EXHIBIT_DATE_FORMAT, strtotime($value));
     	$value = views_json_encode_special_chars($value);
-      $label = str_replace("Profile: ", '', $label); //strip out Profile: from profile fields
+      $label = str_replace("Profile ", '', $label); //strip out Profile: from profile fields
       if ($label == 'type') $json = str_replace('##type##', $value, $json);
       elseif ($label == 'label') $json = str_replace('##label##', $value, $json);
       else $json.=str_repeat(" ", 12).'"'.$label.'"'. " ".": ".'"'.$value.'"'.",\n";
