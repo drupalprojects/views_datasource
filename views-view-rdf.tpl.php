@@ -138,6 +138,7 @@ function rdf_foaf_xml_render($nodes, $view) {
   if ($view->override_path) //inside live preview 
     print htmlspecialchars($xml);
   else {  
+  drupal_set_header('Content-Type: text/xml');
    print $xml;
    module_invoke_all('exit');
    exit;
