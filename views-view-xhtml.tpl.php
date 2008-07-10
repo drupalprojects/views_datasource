@@ -87,17 +87,17 @@ function xhtml_hcard_render($nodes, $view) {
         $value = date(DATE_ISO8601, strtotime($value));
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
       if (is_null($value) || ($value === '')) continue;
-      
-      if (stripos($label, 'address-type') !== FALSE) {
+      //$xhtml .= "$label:$value";
+      if (stripos($label, 'address_type') !== FALSE) {
         $hcard['adr']['type'] = $value; 
       }
-      if (stripos($label, 'post-office-box') !== FALSE) { 
+      if (stripos($label, 'post_office_box') !== FALSE) { 
         $hcard['adr']['post-office-box'] = $value;  
       }
-      if (stripos($label, 'street-address') !== FALSE) {
+      if (stripos($label, 'street_address') !== FALSE) {
         $hcard['adr']['street-address'][] = $value;  
       }
-      if (stripos($label, 'extended-address') !== FALSE) {
+      if (stripos($label, 'extended_address') !== FALSE) {
         $hcard['adr']['extended-address'] = $value;  
       }
       if (stripos($label, 'region') !== FALSE) {
@@ -106,10 +106,10 @@ function xhtml_hcard_render($nodes, $view) {
       if (stripos($label, 'locality') !== FALSE) {
         $hcard['adr']['locality'] = $value;  
       }
-      if (stripos($label, 'postal-code') !== FALSE) {
+      if (stripos($label, 'postal_code') !== FALSE) {
         $hcard['adr']['postal-code'] = $value;  
       }
-      if (stripos($label, 'country-name') !== FALSE) {
+      if (stripos($label, 'country_name') !== FALSE) {
         $hcard['adr']['country-name'] = $value;  
       }
       if (stripos($label, 'agent') !== FALSE) {
@@ -127,19 +127,19 @@ function xhtml_hcard_render($nodes, $view) {
       if (stripos($label, 'email') !== FALSE) {
         $hcard['email'][$label] = $value;  
       }
-      if (stripos($label, 'honorific-prefix') !== FALSE) {
+      if (stripos($label, 'honorific_prefix') !== FALSE) {
         $hcard['n']['honorific-prefix'] = $value;  
       }
-      if (stripos($label, 'given-name') !== FALSE) {
+      if (stripos($label, 'given_name') !== FALSE) {
         $hcard['n']['given-name'] = $value;  
       }
-      if (stripos($label, 'additional-name') !== FALSE) {
+      if (stripos($label, 'additional_name') !== FALSE) {
         $hcard['n']['additional-name'] = $value;  
       }
       if (stripos($label, 'family-name') !== FALSE) {
         $hcard['n']['family-name'] = $value;  
       }
-      if (stripos($label, 'honorific-suffix') !== FALSE) {
+      if (stripos($label, 'honorific_suffix') !== FALSE) {
         $hcard['n']['honorific-suffix'] = $value;  
       }        
       if (stripos($label, 'fn') !== FALSE) {
@@ -148,10 +148,10 @@ function xhtml_hcard_render($nodes, $view) {
       if (stripos($label, 'nickname') !== FALSE) {
         $hcard['nickname'] = $value;  
       }
-      if (stripos($label, 'organization-name') !== FALSE) {
+      if (stripos($label, 'organization_name') !== FALSE) {
         $hcard['org']['organization-name'] = $value;  
       }
-      if (stripos($label, 'organization-unit') !== FALSE) {
+      if (stripos($label, 'organization_unit') !== FALSE) {
         $hcard['org']['organization-unit'][] = $value;  
       }
       if (stripos($label, 'photo') !== FALSE) {
@@ -251,7 +251,9 @@ function xhtml_hcard_render($nodes, $view) {
   if ($view->override_path) //inside live preview 
     print htmlspecialchars($xhtml);
   else {  
+   drupal_set_header('Content-Type: text/html');
    print $xhtml;
+   //var_dump($view);
    module_invoke_all('exit');
    exit;
   }  
