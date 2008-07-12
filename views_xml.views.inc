@@ -47,11 +47,11 @@ class views_plugin_style_xml extends views_plugin_style {
     $form['schema'] = array(
       '#type' => 'radios',
       '#title' => t('XML schema'),
-      '#options' => array('raw' => t('Raw XML'), 'opml' => t('OPML')),
-      '#default_value' => $this->options['format'],
+      '#options' => array('raw' => t('Raw XML'), 'opml' => t('OPML'), 'atom' => t('Atom')),
+      '#default_value' => $this->options['schema'],
     );
   }
-
+  
 }
 
 /**
@@ -63,5 +63,6 @@ function template_preprocess_views_view_xml(&$vars) {
   $view     = &$vars['view'];
   $options  = $view->style_handler->options;
   $handler  = $view->style_handler;
+  $result = array();  
 }
 
