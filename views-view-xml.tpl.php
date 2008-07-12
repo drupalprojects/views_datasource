@@ -107,7 +107,7 @@ function xml_atom_render($view) {
   $xml .='<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">'."\n";  
   $xml .='  <title>'.$view->name.'</title>'."\n";
   $xml .='  <link rel="alternate" type="text/html" href="'.$base_url.'"/>'."\n";
-  $xml .='  <link rel="self" type="application/atom+xml" href="'.$base_url.'/'.$view->display_handler->options['path'].'"/>'."\n";
+  $xml .='  <link rel ="self" type="application/atom+xml" href="'.$base_url.'/'.$view->display_handler->options['path'].'"/>'."\n";
   $xml .='  <id>'.$base_url.'/'.$view->display_handler->options['path'].'</id>'."\n";//use path as id
   $xml .='  <updated>###feed_updated###</updated>'."\n"; //will set later 
   $xml .='  <generator>Views Datasource module</generator>'."\n"; 
@@ -176,7 +176,7 @@ function xml_atom_render($view) {
     $xml .= '    <id>'.$id.'</id>'."\n"; 
     $xml .= '    <updated>'.date(DATE_ATOM, $updated).'</updated>'."\n";
     $xml .= '    <title>'.$title.'</title>'."\n";
-    $xml .= '    <link rel="self" alternate="'.$link.'"/>'."\n";
+    $xml .= '    <link rel="alternate" type="text/html" href="'.$link.'"/>'."\n";
     $xml .= '    <published>'.date(DATE_ATOM, $published).'</published>'."\n";
     if ($author) $xml .= '    <author><name>'.$author.'</name></author>'."\n";
     if ($content)$xml .= '    <content type="html" xml:base="'.$base_url.'"><![CDATA['.$content.']]></content>'."\n";
