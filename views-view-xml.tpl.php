@@ -12,17 +12,6 @@
  * @see views_xml.views.inc
  */
 
-/*
-if (get_class($view->style_plugin->row_plugin) !== 'views_plugin_row_unformatted') {
-  print ('<b style="color:red">The row plugin is not of type Unformatted.</b>');
-  return;
-}
-else if (($view->style_plugin->row_plugin->options['separator']) !== '|') {
-  print ('<b style="color:red">The row plugin separator is not "<span style="color:blue">|</span>" (you can set this in the options for the row style plugin.)</b>');
-  return;
-}
-
-*/
 if ($options['schema'] == 'raw') xml_raw_render($view);
 if ($options['schema'] == 'opml') xml_opml_render($view);
 if ($options['schema'] == 'atom') xml_atom_render($view);
@@ -37,11 +26,12 @@ function xml_raw_render($view) {
     foreach($node as $label => $value) {
       $label = views_xml_strip_illegal_chars($label);
       $value = views_xml_strip_illegal_chars(views_xml_is_date($value));
+      if (is_null($value) || ($value === '') || ($value === 0)) continue;
       if (strtotime($value))
         $value = date(DATE_ISO8601, strtotime($value));
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
-      if (is_null($value) || ($value === '')) continue;
-      $xml .= "    <$label>$value</$label>\n";
+      
+      $xml .= "    <$label><![CDATA[$value]]></$label>\n";
     }
   $xml .= '  </node>'."\n";
   }
@@ -77,8 +67,9 @@ function xml_opml_render($view) {
     	$fieldcount++;
       $label = views_xml_strip_illegal_chars($label);
       $value = views_xml_strip_illegal_chars(views_xml_is_date($value));
+      if (is_null($value) || ($value === '') || ($value === 0)) continue;
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
-      if (is_null($value) || ($value === '')) continue;
+      if (is_null($value) || ($value === '') || ($value === 0)) continue;
       if ((strtolower($label) == 'text') || (strtolower($label) == 'node_revisions_body'))
         $label = "text";
       if ((strtolower($label) == 'type') || (strtolower($label) == 'node_type'))  
@@ -117,12 +108,11 @@ function xml_atom_render($view) {
     foreach($node as $label=>$value) {
       $label = views_xml_strip_illegal_chars($label);
       $value = views_xml_strip_illegal_chars(views_xml_is_date($value));
+      //if (is_null($value) || ($value === '') || ($value === 0)) continue;
       if (strtotime($value)) {//string date
         $value = date(DATE_ISO8601, strtotime($value));
       }
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
-      if (is_null($value) || ($value === '')) continue;
-      
       if (strtolower($label) == 'nid') $entry['nid'] = $value;
       if ((strtolower($label) == 'updated') || (strtolower($label) == 'updated date') || (strtolower($label) == 'node_changed')) {
       	if (intval($value)) //timestamp
@@ -131,16 +121,18 @@ function xml_atom_render($view) {
       		$entry['updated'] = strtotime($value);
       	}
       } 
-      if ((strtolower($label) == 'title') || (strtolower($label) == 'node_title')) $entry['title'] = $value;
+      if ((strtolower($label) == 'title') || (strtolower($label) == 'node_title')) 
+        $entry['title'] = $value;
       if (strtolower($label) == 'link') $entry['link'] = $value;
       if ((strtolower($label) == 'published') || (strtolower($label) == 'node_created')) {
-        if (intval($value)) //timestamp
+      	if (intval($value)) //timestamp
           $entry['published'] =  intval($value) ;
         else if(getdate($value)) { //string date
-          $entry['published'] = strtotime($value);
-        }
-      } 
+           $entry['published'] = strtotime($value);
+      	}
+      }
       if ((strtolower($label) == 'author') || (strtolower($label) == 'users_name')) $entry['author'] = $value;
+      if ((strtolower($label) == 'email') || (strtolower($label) == 'users_mail')) $entry['email'] = $value;
       if ((strtolower($label) == 'content') || (strtolower($label) == 'node_revisions_body')) $entry['content'] = $value;
       //if ((strtolower($label) == 'summary') || (strtolower($label) == 'node_teaser') || (strtolower($label) == 'node_revisions_teaser')) $entry['summary'] = $value;
     }
@@ -152,11 +144,11 @@ function xml_atom_render($view) {
         return;
    	  }
     }
-    elseif (isset($entry['nid']) && (isset($entry['updated'])) && (isset($entry['title'])) && (isset($entry['title']))) { //make the entry path with base_url + nid {
+    elseif (isset($entry['nid']) && (isset($entry['updated'])) && (isset($entry['title'])) && (isset($entry['published']))) { //make the entry path with base_url + nid {
    	  $entry['link'] = $base_url.'/index.php?q='.$entry['nid'];
     }
     else {
-      print ('<b style="color:red">The fields "nid", "title" "published" and "updated" must exist.</b>');
+      print ('<b style="color:red">The fields "nid", "title", "published", and "updated" must exist.');
       return;  
     }
     $link = $entry['link'];
@@ -167,6 +159,7 @@ function xml_atom_render($view) {
     $title = $entry['title'];
     $published = $entry['published'];
     $author = $entry['author'];
+    $email = $entry['email'];
     $content = $entry['content'];
     $summary = $entry['summary'];
     
@@ -178,7 +171,12 @@ function xml_atom_render($view) {
     $xml .= '    <title>'.$title.'</title>'."\n";
     $xml .= '    <link rel="alternate" type="text/html" href="'.$link.'"/>'."\n";
     $xml .= '    <published>'.date(DATE_ATOM, $published).'</published>'."\n";
-    if ($author) $xml .= '    <author><name>'.$author.'</name></author>'."\n";
+    if ($author) {
+    	if ($email) {
+    		$xml .= '    <author><name>'.$author.'</name><email>'.$email.'</email></author>'."\n";
+    	}
+      else $xml .= '    <author><name>'.$author.'</name></author>'."\n";
+    }
     if ($content)$xml .= '    <content type="html" xml:base="'.$base_url.'"><![CDATA['.$content.']]></content>'."\n";
     if ($summary)$xml .= '    <summary type="html" xml:base="'.$base_url.'"><![CDATA['.$summary.']]></summary>'."\n";
     $xml .= '  </entry>'."\n";
