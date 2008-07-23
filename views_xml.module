@@ -172,6 +172,7 @@ function views_xml_raw_render($vid, $nodes, $type) {
 
 function views_xml_opml_render($vid, $nodes, $type) {
 	global $user;
+	global $base_path;
   $view = views_load_view($vid);
   $result = views_build_view('items', $view);
   $fields = _views_get_fields();
@@ -189,33 +190,29 @@ function views_xml_opml_render($vid, $nodes, $type) {
   foreach ($nodes as $node) {
     $xml .= '  <outline ';
     $field_count = 0;
-    foreach ($view->field as $field) {
-      if ($fields[$field['id']]['visible'] !== false) {
-        $field_name = $field['queryname'];
-        $label = preg_replace('/\W/', '',views_xml_strip_illegal_chars($field['label'] ? $field['label'] : $fields[$field['fullname']]['name'])); 
+    foreach ($view->field as $field) {      
+    	if ($fields[$field['id']]['visible'] !== false) {
+    		$label = preg_replace('/\W/', '',views_xml_strip_illegal_chars($field['label'] ? $field['label'] : $fields[$field['fullname']]['name'])); 
         $value = views_xml_strip_illegal_chars(views_xml_is_date(views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $node, $view)));
         if (is_null($value) || ($value === '') || ($value === 0)) continue;
-        if (strtotime($value))
-          $value = date(DATE_ISO8601, strtotime($value));
-        if ((strtolower($label) == 'text') || (strtolower($label) == 'nodebody'))
+        if ((strtolower($label) == 'text') || (strtolower($label) == 'nodebody') )
           $label = "text";
-        if (is_null($value) || ($value === '') || ($value === 0)) continue;
-        if ((strtolower($label) == 'type') || (strtolower($label) == 'node_type'))
+        if ((strtolower($label) == 'type') || (strtolower($label) == 'nodetype'))
           $label = "type";  
         if ((strtolower($label) == 'id') || (strtolower($label) == 'nid') || (strtolower($label) == 'nodeid')) { //if a nid is given construct the url attribute
-          $label = "url";
-          $value = $base_url.'/index.php?q='.$value;
+          $url = 'http://'.$_SERVER['HTTP_HOST'].$base_path.'index.php?q=node/'.$value;
         }  
         if ((strtolower($label) == 'published') || (strtolower($label) == 'node_created') || (strtolower($label) == 'nodecreatedtime')) {
-          $label = 'created';
-          if (intval($value)) //timestamp
-            $value =  date(DATE_RFC822, intval($value)) ;
-          else if(getdate($value)) //string date
-            $value = date(DATE_RFC822, strtotime($value));
+          if ($node->node_created) {
+            $label = 'created';
+            $value = date(DATE_RFC822,$node->node_created);	        	
+          }
         }
         $xml .= $label. '="'.preg_replace('/[^A-Za-z0-9 :\/\-_\.\?\=]/','',$value).'" ';
+        
       }
     }
+    if ($url) $xml.=' '.'url="'.$url.'"';
     $xml .= "  />"."\n";
   }
   $xml .='</body>'."\n";
@@ -251,7 +248,7 @@ function views_xml_atom_render($vid, $nodes, $type) {
   	if ($node->users_name) $entry['author'] = $node->users_name;    	  	
   	if ($node->users_email) $entry['email'] = $node->users_mail;
     foreach ($view->field as $field) {
-      //if ($fields[$field['id']]['visible'] == false) continue;
+      if ($fields[$field['id']]['visible'] === false) continue;
       $label = preg_replace('/\W/', '',views_xml_strip_illegal_chars($field['label'] ? $field['label'] : $fields[$field['fullname']]['name'])); 
       $value = views_xml_strip_illegal_chars(views_xml_is_date(views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $node, $view)));
       $label = str_replace("Profile", '', $label); //strip out Profile: from profile fields
@@ -297,15 +294,15 @@ function views_xml_atom_render($vid, $nodes, $type) {
         if (parse_url($entry['link'])) 
           $link = $entry['link']; 
         else {
-          print ('<b style="color:red">The link URL is not valid.</b>');
+          drupal_set_message('The link URL is not valid.', 'error');
           return;
         }
       }
-      elseif (isset($entry['nid']) && (isset($entry['updated'])) && (isset($entry['title'])) && (isset($entry['published']))) { //make the entry path with base_path + nid {
+      elseif ((isset($entry['nid'])) && (isset($entry['updated'])) && (isset($entry['title'])) && (isset($entry['published']))) { //make the entry path with base_path + nid {
         $entry['link'] = 'http://'.$_SERVER['HTTP_HOST'].$base_path.'index.php?q=node/'.$entry['nid'];
       }
       else {
-        print ('<b style="color:red">The fields "nid", "title", "published", and "updated" must exist.');
+        drupal_set_message('The fields "nid", "title", "published", and "updated" must exist.', 'error');
         return;  
       }
       
