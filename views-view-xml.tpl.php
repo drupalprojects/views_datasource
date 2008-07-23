@@ -50,33 +50,50 @@ function xml_opml_render($view) {
 	//var_dump($view);
 	//return;
   global $user;
+  global $base_url;
 	$xml .= '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
   $xml .= '<!-- generator="Drupal Views_Datasource.Module" -->'."\n";
-  $xml .='<opml version="1.0">'."\n";  
+  $xml .='<opml version="2.0">'."\n";  
 	$xml .='<head>'."\n";
 	$xml .='  <title>'.variable_get('site_name', 'drupal').'-'.$view->name.'</title>'."\n";
 	$xml .='  <ownerName>'.$user->name.'</ownerName>'."\n";
 	$xml .='  <ownerEmail>'.$user->mail.'</ownerEmail>'."\n";
+	$xml .='  <docs>'.$base_url.'</docs>';
 	$xml .='  <dateCreated>'.date(DATE_ISO8601, time()).'</dateCreated>'."\n";
 	$xml .='</head>'."\n";
 	$xml .='<body>'."\n";
   foreach ($view->result as $node) {
     $xml .= '  <outline ';
     $fieldcount = 0;   
-    foreach($node as $label => $value) {
-    	$fieldcount++;
-      $label = views_xml_strip_illegal_chars($label);
-      $value = views_xml_strip_illegal_chars(views_xml_is_date($value));
+    foreach($node as $field_name=>$field_value) {
+    	$label = views_xml_strip_illegal_chars($field_name);
+      $value = views_xml_strip_illegal_chars(views_xml_is_date($field_value));
       if (is_null($value) || ($value === '') || ($value === 0)) continue;
+    	$fieldcount++;      
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
       if (is_null($value) || ($value === '') || ($value === 0)) continue;
       if ((strtolower($label) == 'text') || (strtolower($label) == 'node_revisions_body'))
         $label = "text";
-      if ((strtolower($label) == 'type') || (strtolower($label) == 'node_type'))  
-        $label = "type";
-      $xml .= $label. '="'.preg_replace('/[^A-Za-z0-9 ]/','',$value).'" ';
+      if (is_null($value) || ($value === '') || ($value === 0)) continue;
+      if ((strtolower($label) == 'type') || (strtolower($label) == 'node_type'))
+        $label = "type";  
+      if ((strtolower($label) == 'id') || (strtolower($label) == 'nid')) { //if a nid is given construct the url attribute
+      	$url = $base_url.'index.php?q=node/'.$value;  
+      }
+        
+      if ((strtolower($label) == 'published') || (strtolower($label) == 'node_created')) {
+      	$label = 'created';
+        if (intval($value)) //timestamp
+          $value =  date(DATE_RFC822, intval($value)) ;
+        else if(getdate($value)) //string date
+           $value = date(DATE_RFC822, strtotime($value)); 
+      }  
+      $xml .= $label. '="'.preg_replace('/[^A-Za-z0-9 :\/\-_\.\?\=]/','',$value).'" ';
+      
+      //$xml .= $label. '="'.$value.'" ';
     }
-  $xml .= '/>'."\n";
+    if ($url) $xml.=' '.'url="'.$url.'" ';
+  $xml .=  ' />'."\n";
   }
 	$xml .='</body>'."\n";
   $xml .='</opml>'."\n";
@@ -85,6 +102,7 @@ function xml_opml_render($view) {
 	else {  
    drupal_set_header('Content-Type: text/xml');
    print $xml;
+   //var_dump($rows);
    module_invoke_all('exit');
    exit;
 	}
@@ -105,10 +123,10 @@ function xml_atom_render($view) {
   $feed_last_updated = 0;
   foreach ($view->result as $node) {
   	$entry = array();   
-    foreach($node as $label=>$value) {
-      $label = views_xml_strip_illegal_chars($label);
-      $value = views_xml_strip_illegal_chars(views_xml_is_date($value));
-      //if (is_null($value) || ($value === '') || ($value === 0)) continue;
+    foreach($node as $field_name=>$field_value) {
+      $label = views_xml_strip_illegal_chars($field_name);
+      $value = views_xml_strip_illegal_chars(views_xml_is_date($field_value));
+      if (is_null($value) || ($value === '') || ($value === 0)) continue;
       if (strtotime($value)) {//string date
         $value = date(DATE_ISO8601, strtotime($value));
       }
@@ -134,7 +152,7 @@ function xml_atom_render($view) {
       if ((strtolower($label) == 'author') || (strtolower($label) == 'users_name')) $entry['author'] = $value;
       if ((strtolower($label) == 'email') || (strtolower($label) == 'users_mail')) $entry['email'] = $value;
       if ((strtolower($label) == 'content') || (strtolower($label) == 'node_revisions_body')) $entry['content'] = $value;
-      //if ((strtolower($label) == 'summary') || (strtolower($label) == 'node_teaser') || (strtolower($label) == 'node_revisions_teaser')) $entry['summary'] = $value;
+      if ((strtolower($label) == 'summary') || (strtolower($label) == 'node_teaser') || (strtolower($label) == 'node_revisions_teaser')) $entry['summary'] = $value;
     }
     if (isset($entry['nid']) && (isset($entry['updated'])) && (isset($entry['link'])) && (isset($entry['title'])) && (isset($entry['published']))) {
    	  if (parse_url($entry['link'])) 
@@ -145,7 +163,7 @@ function xml_atom_render($view) {
    	  }
     }
     elseif (isset($entry['nid']) && (isset($entry['updated'])) && (isset($entry['title'])) && (isset($entry['published']))) { //make the entry path with base_url + nid {
-   	  $entry['link'] = $base_url.'/index.php?q='.$entry['nid'];
+   	  $entry['link'] = $base_url.'/index.php?q=node/'.$entry['nid'];
     }
     else {
       print ('<b style="color:red">The fields "nid", "title", "published", and "updated" must exist.');
@@ -168,7 +186,7 @@ function xml_atom_render($view) {
     $xml .= '  <entry>'."\n";
     $xml .= '    <id>'.$id.'</id>'."\n"; 
     $xml .= '    <updated>'.date(DATE_ATOM, $updated).'</updated>'."\n";
-    $xml .= '    <title>'.$title.'</title>'."\n";
+    $xml .= '    <title type="text">'.$title.'</title>'."\n";
     $xml .= '    <link rel="alternate" type="text/html" href="'.$link.'"/>'."\n";
     $xml .= '    <published>'.date(DATE_ATOM, $published).'</published>'."\n";
     if ($author) {
@@ -186,9 +204,9 @@ function xml_atom_render($view) {
   if ($view->override_path) //inside live preview 
     print htmlspecialchars($xml);
   else {  
-   drupal_set_header('Content-Type: text/xml');
+   drupal_set_header('Content-Type: application/atom+xml');
    print $xml;
-   //var_dump($view);   
+   //var_dump($label);   
    module_invoke_all('exit');
    exit;
   }
