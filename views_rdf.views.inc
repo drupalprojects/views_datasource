@@ -17,7 +17,7 @@ function views_rdf_views_plugins() {
       'views_rdf' => array(
         'title' => t('RDF data document'),
         'theme' => 'views_view_rdf',
-        'help' => t('Displays nodes in the RDF data format.'),
+        'help' => t('Displays nodes using the RDF data format.'),
         'handler' => 'views_plugin_style_rdf',
         'uses row plugin' => TRUE,
         'uses fields' => TRUE,
@@ -47,8 +47,8 @@ class views_plugin_style_rdf extends views_plugin_style {
     $form['vocabulary'] = array(
       '#type' => 'radios',
       '#title' => t('RDF vocabulary'),
-      '#options' => array('FOAF' => t('FOAF')),
-      '#default_value' => $this->options['format'],
+      '#options' => array('FOAF' => t('FOAF'),'SIOC' => t('SIOC') ),
+      '#default_value' => $this->options['vocabulary'],
     );
   }
 
