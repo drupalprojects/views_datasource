@@ -203,7 +203,7 @@ function rdf_sioc_xml_render($view) {
      foaf:Person (using the property sioc:account_of) which describes 
      information about the individual itself.\n";
     $xml .= "  </dc:description>\n";
-    //$xml .= "<foaf:primaryTopic rdf:resource=\"####user_name###\"/>\n";
+    $xml .= "####foaf_topics####\n";
     $xml .= "  <admin:generatorAgent rdf:resource=\"http://drupal.org/project/views_datasource\"/>\n";
     $xml .= "</foaf:Document>\n";
     foreach($view->result as $node) $xml .= rdf_sioc_xml_user_render($node);     
@@ -297,7 +297,8 @@ function rdf_sioc_xml_render($view) {
     $xml .= "<foaf:Document rdf:about=\"".url($view->name, array('absolute'=>true))."\">\n";
     $xml .= "  <dc:title>SIOC profile for: ".variable_get('site_name', 'drupal')."</dc:title>\n";
     $xml .= "  <dc:description>\n";
-    $xml .= "    A Post is an article or message posted by a User to a Forum or Site. A series of Posts 
+    $xml .= "    A SIOC profile describes the structure and contents of a weblog in a machine readable form. For more information please refer to http://sioc-project.org/.
+    A Post is an article or message posted by a User to a Forum or Site. A series of Posts 
     may be threaded if they share a common subject and are connected by reply or 
     by date relationships. Posts will have content and may also have attached 
     files, which can be edited or deleted by the Moderator of the Forum or Site that 
@@ -402,7 +403,7 @@ function rdf_sioc_xml_node_render($node, &$users=null, &$nodes = null) {
   $user = user_load($uid);  
   if (!array_key_exists($uid, $users)) $users[$uid] = rdf_sioc_xml_user_render(null, $uid, $user->name, $user->mail);
   if (!array_key_exists($nid, $nodes)) {
-    if ($type == 'story') $nodes[$nid] = rdf_sioc_xml_story_render($xml, $nid, $title, $type, $created, $changed, $last_updated, $uid, $body);  	
+    if (($type == 'page') || ($type == 'story') || ($type == 'forum') || ($type == 'blog')) $nodes[$nid] = rdf_sioc_xml_story_render($xml, $nid, $title, $type, $created, $changed, $last_updated, $uid, $body);  	
   }
   //$xml = '';
   //var_dump($nodes);
@@ -415,11 +416,71 @@ function rdf_sioc_xml_story_render($xml, $nid, $title, $type, $created, $changed
 	$node_url = url($nid, array('absolute'=>true));
   $xml .= "<sioc:Post rdf:about=\"$node_url\">\n";
   $xml .= "  <dc:title>$title</dc:title>\n";
-  $xml .= "  <sioc:content><![CDATA[$body]]></sioc:content>\n";
+  $xml .= "  <sioc:content>\n ";
+  $xml .= "    <![CDATA[$body]]>\n";
+  $xml .= "  </sioc:content>\n";
   $xml .= "  <dc:created>".date(DATE_ISO8601, $created)."</dc:created>\n";
   $xml .= "  <dc:modified>".date(DATE_ISO8601, $changed)."</dc:modified>\n";
   $xml .= "  <sioc:link rdf:resource=\"$node_url\" rdfs:label=\"$title\" />\n";
   $xml .= "  <sioc:has_creator rdf:nodeID=\"$uid\"/>\n";
+  
+  /*Add taxonomy terms as SIOC topics*/
+  $query = db_query('SELECT tn.tid AS tid, td.name AS name FROM {term_node} tn, {term_data} td WHERE td.tid = tn.tid AND tn.nid = %d', $nid);
+  while ($term = db_fetch_object($query)) {
+    $taxonomy_terms = "  <sioc:topic rdfs:label=\"$term->name\" rdf:resource=\"".url("taxonomy/term/$term->tid", array('absolute' => TRUE))."\" />\n";
+  }
+  $xml .= $taxonomy_terms;
+  
+  /*Add comments as SIOC replies*/
+  $query_count = 'SELECT COUNT(*) FROM {comments} WHERE nid = %d AND status = %d';
+  $query = 'SELECT c.cid as cid, c.pid, c.nid, c.subject, c.comment, c.format, c.timestamp, c.name, c.mail, c.homepage, u.uid, u.name AS registered_name, u.signature, u.picture, u.data, c.thread, c.status FROM {comments} c INNER JOIN {users} u ON c.uid = u.uid WHERE c.nid = %d and c.status = %d ORDER BY SUBSTRING(c.thread, 1, (LENGTH(c.thread) - 1))';
+  $query_args = array($nid, COMMENT_PUBLISHED);
+  $query = db_rewrite_sql($query, 'c', 'cid');
+  $comment_children = 0;
+  $num_rows = FALSE;
+  $comments = '';
+  $result = db_query($query, $query_args);
+  while ($comment = db_fetch_object($result)) {
+    $comment = drupal_unpack($comment);
+//    var_dump($comment);module_invoke_all('exit');return;
+//    $comment->depth = count(explode('.', $comment->thread)) - 1;
+//    if ($comment->depth > $comment_children) {
+//      $comment_children++;
+//      $comments .= "  <sioc:has_reply>\n";
+//    }
+//    else {
+//      while ($comment->depth < $comment_children) {
+//        $comment_children--;
+//        $comments .= "  </sioc:has_reply>\n";
+//      }
+//    }        
+//    $comments .="     <sioc:Post rdf:about=\"$node_url#comment-$comment->cid\">\n";    
+//    while ($comment_children-- > 0) {
+//      $num_rows = TRUE;
+//      $comments .="       <sioc:content><![CDATA[$comment->comment]]></sioc:content>\n";
+//      $comments .="     </sioc:Post>\n";
+//      $comments .= "  </sioc:has_reply>\n";
+//    }
+//  }
+    $comments .= "  <sioc:has_reply>\n";
+    $comments .= "    <sioc:Post rdf:about=\"$node_url#comment-$comment->cid\">\n";
+    if ($comment->subject) $comments .= "      <dc:title>$comment->subject</dc:title>\n";
+    if ($comment->timestamp) $comments .= "      <dc:created>".date(DATE_ISO8601, $comment->timestamp)."</dc:created>\n";
+    if ($comment->uid) {
+    	$comments .= "    <sioc:has_creator>\n";
+      $comments .= "      <sioc:User>\n";
+      $comments .= "        <sioc:name>$comment->registered_name</sioc:name>\n";
+      $comments .= "        <sioc:email rdf:resource=\"mailto:$comment->mail\"/>\n";
+      $comments .="         <sioc:link rdf:resource=\"".url('user/'.$comment->uid, array('absolute'=>true))."\" rdfs:label=\"$comment->registered_name\"/>\n";
+  	  $comments .= "      </sioc:User>\n";
+  	  $comments .= "    </sioc:has_creator>\n";
+    }    	    
+    $comments .= "      <sioc:content><![CDATA[$comment->comment]]></sioc:content>\n";
+    $comments .= "    </sioc:Post>\n";
+    $comments .= "  </sioc:has_reply>\n";
+  }
+  $xml.= $comments;
+  
   $xml .= "</sioc:Post>\n";
 	return $xml;
 }	 
