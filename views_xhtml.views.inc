@@ -47,7 +47,7 @@ class views_plugin_style_xhtml extends views_plugin_style {
     $form['format'] = array(
       '#type' => 'radios',
       '#title' => t('Microformat'),
-      '#options' => array('hcard' => t('hCard')),
+      '#options' => array('hcard' => t('hCard'), 'hcalendar' => t('hCalendar')),
       '#default_value' => $this->options['format'],
     );
   }
