@@ -12,37 +12,20 @@
  * @see views_json.views.inc
  */
  
-if (get_class($view->style_plugin->row_plugin) !== 'views_plugin_row_unformatted') {
-  print ('<b style="color:red">The row plugin is not of type Unformatted.</b>');
-  return;
-}
-else if (($view->style_plugin->row_plugin->options['separator']) !== '|') {
-  print ('<b style="color:red">The row plugin separator is not "<span style="color:blue">|</span>" (you can set this in the options for the row style plugin.)</b>');
-  return;
-}
+if ($options['format'] == 'Simple') json_simple_render($view);
+if ($options['format'] == 'Exhibit') json_exhibit_render($view);
 
-$items = array();
-foreach($rows as $row) {
-  $items[] = explode("|", trim($row));
-  }
-
-if ($options['format'] == 'Simple') json_simple_render($items, $view);
-if ($options['format'] == 'Exhibit') json_exhibit_render($items, $view);
-
-function json_simple_render($items, $view) {
+function json_simple_render($view) {
   define('EXHIBIT_DATE_FORMAT', '%Y-%m-%d %H:%M:%S');	
 	$json = '"nodes":'.str_repeat(" ", 4)."[\n";
-	foreach($items as $item) {
+	foreach ($view->result as $node) {
 		$json.= str_repeat(" ", 6)."{\n";
-		foreach($item as $itemfield) {
-			$itemfieldarray = explode(":", $itemfield);
-
-			/*replace escaped colons with actual colon*/
-			$itemfieldarray[0] = str_replace('#colon#', ':', $itemfieldarray[0]);
-			$itemfieldarray[1] = str_replace('#colon#', ':', $itemfieldarray[1]);
-
-			$label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($itemfieldarray[0])));
-      $value = views_json_encode_special_chars(trim(views_json_is_date($itemfieldarray[1])));
+		foreach($node as $field_label => $field_value) {
+		  /*replace escaped colons with actual colon*/
+			$label = str_replace('#colon#', ':', $field_label);
+			$value = str_replace('#colon#', ':', $field_value);
+			$label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($label)));
+      $value = views_json_encode_special_chars(trim(views_json_is_date($value)));
       if (strtotime($value))
         $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
@@ -51,11 +34,8 @@ function json_simple_render($items, $view) {
 		$json.=str_repeat(" ", 6)."},\n\n";	
 	}
 	$json.=str_repeat(" ", 4)."]";
-  /*
-   * The following will cause an error in a live view preview - comment out if
-   * debugging in there.
-   */
-  if ($view->override_path) { //inside a live preview so just output the text (not working yet)
+  
+  if ($view->override_path) { //inside a live preview so just output the text
     print $json; 
   }
   else { //real deal so switch the content type and stop further processing of the page
@@ -67,22 +47,19 @@ function json_simple_render($items, $view) {
 	
 }
 
-function json_exhibit_render($items, $view) {
+function json_exhibit_render($view) {
   define('EXHIBIT_DATE_FORMAT', '%Y-%m-%d %H:%M:%S');
   $json = "{\n".str_repeat(" ", 4).'"items"'." : ". "[\n";
-  foreach ($items as $item) { 
+  foreach ($view->result as $node) { 
   	$json.=str_repeat(" ", 8)."{\n";
   	$json.=str_repeat(" ", 12).'"type" '. " ".": ".'"'.'##type##'.'",'."\n";
     $json.=str_repeat(" ", 12).'"label" '. " "." : ".'"'.'##label##'.'",'."\n"; 
-  	foreach ($item as $itemfield) {
-  		$itemfieldarray = explode(":", $itemfield);
-  		
+    foreach($node as $field_label => $field_value) {
       /*replace escaped colons with actual colon*/
-      $itemfieldarray[0] = str_replace('#colon#', ':', $itemfieldarray[0]);
-      $itemfieldarray[1] = str_replace('#colon#', ':', $itemfieldarray[1]);
-  		
-  		$label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($itemfieldarray[0]))); 
-  		$value=views_json_encode_special_chars(trim(views_json_is_date($itemfieldarray[1])));
+      $label = str_replace('#colon#', ':', $field_label);
+      $value = str_replace('#colon#', ':', $field_value);
+      $label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($label)));
+      $value = views_json_encode_special_chars(trim(views_json_is_date($value)));
   		//if (empty($value)) continue;        
       if (strtotime($value))
         $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
