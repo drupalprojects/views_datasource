@@ -18,6 +18,13 @@ function views_xhtml_views_style_plugins() {
       'needs_fields' => TRUE,
       'even_empty' => TRUE,
     ),
+    'views_xhtml_hcalendar' => array(
+      'name' => t('Views XHTML: hCalendar XHTML data document'),
+      'theme' => 'views_xhtml_hcalendar',
+      'needs_table_header' => TRUE,
+      'needs_fields' => TRUE,
+      'even_empty' => TRUE,
+    ),
   );
 }
 
@@ -33,16 +40,31 @@ function views_xhtml_views_arguments() {
       'option' => 'string',
       'help' => t('This argument specifies a document selector; it will only provide a method for rendering the current view as a XHTML hCard document.'),
     ),
+    'xhtml_hcalendar' => array(
+      'name' => t('Views XHTML: hCalendar data document selector'),
+      'handler' => 'views_xhtml_hcalendar_handler',
+      'option' => 'string',
+      'help' => t('This argument specifies a document selector; it will only provide a method for rendering the current view as a XHTML hCalendar document.'),
+    ),
   );
   return $arguments;
 }
 
 /**
- * handler for our own XHTML argument handler
+ * handler for our own XHTML hCard argument handler
  */
 function views_xhtml_hcard_handler($op, &$query, $argtype, $arg='') {
   if ($op == 'filter') {
     views_xhtml_hcard_views_argument('argument', $GLOBALS['current_view'], $arg);
+  }
+}
+
+/**
+ * handler for our own XHTML hCalendar argument handler
+ */
+function views_xhtml_hcalendar_handler($op, &$query, $argtype, $arg='') {
+  if ($op == 'filter') {
+    views_xhtml_hcalendar_views_argument('argument', $GLOBALS['current_view'], $arg);
   }
 }
 
@@ -69,6 +91,28 @@ function views_xhtml_hcard_views_argument($op, &$view, $arg) {
 }
 
 /**
+ * argument hook that will display the hCalendar data document or display export icons.
+ */
+function views_xhtml_hcalendar_views_argument($op, &$view, $arg) {
+  if ($op == 'argument' && ($arg == 'xhtml_hcalendar')) {
+    $view->page_type = 'views_'. $arg;
+  }
+  else if ($op == 'post_view' && $view->build_type != 'block') {
+    $args = views_post_view_make_args($view, $arg, $arg);
+    $url = views_get_url($view, $args);
+    $title = views_get_title($view, 'page', $args);
+    $links = array();
+   
+    if ($arg == 'xhtml_hcalendar') {
+      if (($image = theme('image', drupal_get_path('module', 'views_xhtml') .'/hcalendar.png', t('hCalendar'), t('Show @title as a hCalendar document.', array('@title' => $title))))) {
+        $links[] = l($image, $url, array('class' => 'xhtml-icon'), $url_filter, NULL, FALSE, TRUE);
+      return implode('&nbsp;&nbsp;', $links);
+      }
+    }
+  }
+}
+
+/**
  * post view to display the render icons
  */
 function views_xhtml_views_post_view($view, $items, $output) {
@@ -77,6 +121,9 @@ function views_xhtml_views_post_view($view, $items, $output) {
     if ($argument['type'] == 'xhtml_hcard') {
       $links .= views_xhtml_hcard_views_argument('post_view', $view, $argument['type'], '');
     }
+    if ($argument['type'] == 'xhtml_hcalendar') {
+      $links .= views_xhtml_hcalendar_views_argument('post_view', $view, $argument['type'], '');
+    }    
   }
   return $links;
 }
@@ -86,6 +133,13 @@ function views_xhtml_views_post_view($view, $items, $output) {
  */
 function theme_views_xhtml_hcard($view, $nodes, $type) {
   return views_xhtml_hcard_render($view->vid, $nodes, $type);
+}
+
+/*
+ * describes how to theme an XHTML hCalendar view
+ */
+function theme_views_xhtml_hcalendar($view, $nodes, $type) {
+  return views_xhtml_hcalendar_render($view->vid, $nodes, $type);
 }
 
 function views_xhtml_hCard_render($vid, $nodes, $type) {
@@ -313,6 +367,155 @@ function views_xhtml_hCard_render($vid, $nodes, $type) {
   //return $xhtml;
 }
 
+function views_xhtml_hCalendar_render($vid, $nodes, $type) {
+  $view = views_load_view($vid);
+  $fields = _views_get_fields();
+  $xhtml = "\r\n";
+  $xhtml .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'."\n";
+  $xhtml .= '<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr"'.">\r\n";
+  $xhtml .= '<head>'."\r\n";
+  $xhtml .= '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'."\r\n";
+  $xhtml .= '  <meta name="KEYWORDS" content="hCalendars" />'."\r\n";
+  $xhtml .= '  <title>hCards</title>'."\r\n";
+  $xhtml .= '</head>'."\r\n";
+  $xhtml .= '<body>'."\r\n";
+  foreach ($nodes as $node) {
+  	$hcalendar = array();
+  	foreach ($view->field as $field) {
+  	  if ($fields[$field['id']]['visible'] === false) continue; 
+      //$label = $field['label'] ? $field['label'] : $fields[$field['fullname']]['name'];
+      //$label = views_xhtml_strip_illegal_chars($label); /*strip illegal XML characters*/
+      //$label = str_replace("Profile", '', $label); //strip out Profile: from profile fields
+      //$value = views_xhtml_strip_illegal_chars(views_xhtml_is_date(views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $node, $view)));
+      //$value = views_xhtml_strip_illegal_chars(views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $node, $view));
+      $label = views_xhtml_strip_illegal_chars($field['label'] ? $field['label'] : $fields[$field['fullname']]['name']); 
+      $value = views_xhtml_strip_illegal_chars(views_xhtml_is_date(views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $node, $view)));  
+      $label = str_replace("Profile", '', $label); //strip out Profile: from profile fields
+      if (strtotime($value))
+        $value = date(DATE_ISO8601, strtotime($value));
+      if (is_null($value) || ($value === '') || ($value === 0)) continue;
+  	  if (stripos($label, 'class') !== FALSE) {
+        $hcalendar['class'] = $value;  
+      }
+      if (stripos($label, 'category') !== FALSE) {
+        $hcalendar['category'][] = $value;  
+      }
+      if (stripos($label, 'description') !== FALSE) {
+        $hcalendar['description'] = $value; 
+      }
+      if (stripos($label, 'summary') !== FALSE) {
+        $hcalendar['summary'] = $value; 
+      }
+      if ((stripos($label, 'dtstart') !== FALSE) || (stripos($label, 'event_start') !== FALSE) || (stripos($label, 'eventstarttime') !== FALSE)) {
+        //if (strtotime($value))
+  	    //  $hcalendar['dtstart'] = date(DATE_ISO8601, strtotime($value));
+  	  $hcalendar['dtstart'] = $value;        
+      }
+      if ((stripos($label, 'dtend') !== FALSE) || (stripos($label, 'event_end') !== FALSE) || (stripos($label, 'eventendtime') !== FALSE)) {
+        if (strtotime($value)) $hcalendar['dtend'] = date(DATE_ISO8601, strtotime($value)); 
+      }
+      if (stripos($label, 'duration') !== FALSE) {
+        $hcalendar['duration'] = $value; 
+      }
+      if (stripos($label, 'geo_latitude') !== FALSE) {
+        $hcalendar['geo']['latitude'] = $value; 
+      }
+      if (stripos($label, 'geo_longitude') !== FALSE) {
+        $hcalendar['geo']['longitude'] = $value; 
+      }
+      if (stripos($label, 'location') !== FALSE) {
+        $hcalendar['location'] = $value; 
+      }
+      if (stripos($label, 'status') !== FALSE) {
+        $hcalendar['status'] = $value; 
+      }
+      if (stripos($label, 'uid') !== FALSE) {
+        $hcalendar['uid'] = $value; 
+      }
+      if (stripos($label, 'url') !== FALSE) {
+        $hcalendar['url'] = $value; 
+      }
+      if (stripos($label, 'last_modified') !== FALSE) {
+        $hcalendar['last-modified'] = $value; 
+      }
+      if (stripos($label, 'address_type') !== FALSE) {
+        $hcalendar['adr']['type'] = $value; 
+      }
+      if (stripos($label, 'post_office_box') !== FALSE) {
+        $hcalendar['adr']['post-office-box'] = $value;  
+      }
+      if (stripos($label, 'street_address') !== FALSE) {
+        $hcalendar['adr']['street-address'][] = $value;  
+      }
+      if (stripos($label, 'extended_address') !== FALSE) {
+        $hcalendar['adr']['extended-address'] = $value;  
+      }
+      if (stripos($label, 'region') !== FALSE) {
+        $hcalendar['adr']['region'] = $value;  
+      }
+      if (stripos($label, 'locality') !== FALSE) {
+        $hcalendar['adr']['locality'] = $value;  
+      }
+      if (stripos($label, 'postal_code') !== FALSE) {
+        $hcalendar['adr']['postal-code'] = $value;  
+      }
+      if (stripos($label, 'country_name') !== FALSE) {
+        $hcalendar['adr']['country-name'] = $value;  
+  	  }
+  	}
+  	$xhtml .= '<div class = "vevent">'."\r\n";
+    $class = $hcalendar['class'];
+    if ($class) $xhtml .='  <span class="class">'.$class.'</span>'."<br/>\r\n";
+    $categories = $hcalendar['category'];
+    if ($categories)  
+      foreach ($categories as $category) $xhtml .='  <span class="category">'.$category.'</span>'."<br/>\r\n";
+    $dtstart = $hcalendar['dtstart'];
+    if ($dtstart) 
+    $xhtml .='  <span class="dtstart">'.$dtstart.'</span>'."<br/>\r\n";
+    $summary = $hcalendar['summary'];
+    if ($summary) $xhtml .='  <span class="summary">'.$summary.'</span>'."<br/>\r\n";
+    $dtend = $hcalendar['dtend'];
+    if ($dtend) $xhtml .='  <span class="dtend">'.$dtend.'</span>'."<br/>\r\n";
+    $location = $hcalendar['location'];
+    if ($location) $xhtml .='  <span class="location">'.$location.'</span>'."<br/>\r\n";
+    $geo_latitude = $hcalendar['geo-latitude'];
+    $geo_longitude = $hcalendar['geo-longitude'];
+    if ($geo_latitude || $geo_longitude) {
+    	$xhtml .= "  <div class=\"geo\">\n";
+    	if ($location) $xhtml .= "    $location: ";
+    	if ($geo_latitude) $xhtml .= "    <span class=\"latitude\">$geo_latitude</span>; ";
+    	if ($geo_longitude) $xhtml .="    <span class=\"longitude\">$geo_longitude</span>";
+    	$xhtml .= "  </div>\n";
+    }
+    $status = $hcalendar['status'];
+    if ($status) $xhtml .='  <span class="status">'.$status.'</span>'."<br/>\r\n";
+    $duration = $hcalendar['duration'];
+    if ($duration) $xhtml .='  <span class="duration">'.$duration.'</span>'."<br/>\r\n";
+    $uid= $hcalendar['uid'];
+    if ($uid) $xhtml .='  <span class="uid">'.$uid.'</span>'."<br/>\r\n";
+    $url = $hcalendar['url'];
+    if ($url) $xhtml .='  <span class="url">'.$url.'</span>'."<br/>\r\n";
+    $last_modified = $hcalendar['last-modified'];
+    if ($last_modified) $xhtml .='  <span class="last-modified">'.$last_modified.'</span>'."<br/>\r\n";
+    $description = $hcalendar['description'];
+    if ($description) $xhtml .='  <span class="description">'.$description.'</span>'."<br/>\r\n";
+    $adr = $hcalendar['adr'];
+    if ($adr) {
+    	$xhtml .= "  <div class=\"adr\">\n";
+    	$adr_type = $adr['address-type'];
+    	if ($adr_type) $xhtml .= '    <span class="address-type">'.$adr_type.'</span>'."<br/>\r\n"; 
+    	$xhtml .="  </div>";
+    }
+    $xhtml .= '</div>'."\r\n";    
+  }
+  $xhtml.='</body>'."\r\n";
+  $xhtml.='</html>'."\r\n";
+  drupal_set_header('Content-Type: text/html');
+  //var_dump($view);
+  print $xhtml;
+  module_invoke_all('exit');
+  exit;
+}
 /**
  * Strips illegal Unicode characters and encodes entities in string
  *
@@ -320,21 +523,30 @@ function views_xhtml_hCard_render($vid, $nodes, $type) {
  * @return string
  */
 function views_xhtml_strip_illegal_chars($input) {
-  $output = preg_replace('/[\x{80}-\x{A0}'. // Non-printable ISO-8859-1 + NBSP
-        '\x{01}-\x{1F}'. //Non-printable ASCII characters
-        '\x{AD}'. // Soft-hyphen
-        '\x{2000}-\x{200F}'. // Various space characters
-        '\x{2028}-\x{202F}'. // Bidirectional text overrides
-        '\x{205F}-\x{206F}'. // Various text hinting characters
-        '\x{FEFF}'. // Byte order mark
-        '\x{FF01}-\x{FF60}'. // Full-width latin
-        '\x{FFF9}-\x{FFFD}'. // Replacement characters
-        '\x{0}]/u', // NULL byte
-        '', $input);
-  $output = str_replace('"', '&quot;', $output); //encode quote
-  $output = str_replace('&', '&amp;', $output); //encode ampersand
-  $output = str_replace("'", '&pos;', $output); //encode apostrophe
-  $output = str_replace('<', '&lt;', $output); //encode left-angled bracket
-  $output = str_replace('>', '&rt;', $output); //encode right-angled bracket
-  return $output;
+//  $output = preg_replace('/[\x{80}-\x{A0}'. // Non-printable ISO-8859-1 + NBSP
+//        '\x{01}-\x{1F}'. //Non-printable ASCII characters
+//        '\x{AD}'. // Soft-hyphen
+//        '\x{2000}-\x{200F}'. // Various space characters
+//        '\x{2028}-\x{202F}'. // Bidirectional text overrides
+//        '\x{205F}-\x{206F}'. // Various text hinting characters
+//        '\x{FEFF}'. // Byte order mark
+//        '\x{FF01}-\x{FF60}'. // Full-width latin
+//        '\x{FFF9}-\x{FFFD}'. // Replacement characters
+//        '\x{0}]/u', // NULL byte
+//        '', $input);
+//  $output = str_replace('"', '&quot;', $output); //encode quote
+//  $output = str_replace('&', '&amp;', $output); //encode ampersand
+//  $output = str_replace("'", '&pos;', $output); //encode apostrophe
+//  $output = str_replace('<', '&lt;', $output); //encode left-angled bracket
+//  $output = str_replace('>', '&rt;', $output); //encode right-angled bracket
+//  return $output;
+return check_plain(strip_tags($input));
+}
+
+function views_xhtml_is_date ($input) {
+  if (strpos($input, 'a:3:{s:5:"month"') !== 0) return $input; 
+  else { //serialized date array
+    $date = unserialize($input);
+    return date(DATE_ISO8601, mktime(0, 0, 0, $date['month'], $date['day'], $date['year']));
+  }
 }
