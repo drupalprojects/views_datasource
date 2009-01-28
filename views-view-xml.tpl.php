@@ -101,8 +101,8 @@ function xml_opml_render($view) {
 	  print htmlspecialchars($xml);
 	else {  
    drupal_set_header('Content-Type: text/xml');
-   print $xml;
-   //var_dump($rows);
+   //print $xml;
+   var_dump($view);
    module_invoke_all('exit');
    exit;
 	}
