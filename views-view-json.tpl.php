@@ -17,24 +17,28 @@ if ($options['format'] == 'Exhibit') json_exhibit_render($view);
 
 function json_simple_render($view) {
   define('EXHIBIT_DATE_FORMAT', '%Y-%m-%d %H:%M:%S');	
-	$json = '"nodes":'.str_repeat(" ", 4)."[\n";
+	$json = "{\n".'  "nodes":'."\n".str_repeat(" ", 4)."[\n";
+	$total_view_result_count = count((array)($view->result)); //cast the result object to an array so we can count how many properties in itt;
+	$view_result_count = 0;
 	foreach ($view->result as $node) {
 		$json.= str_repeat(" ", 6)."{\n";
+		$total_field_count = count((array)$node); //cast the node object to an array so we can count how many properties in itt
+		$field_count = 0;
 		foreach($node as $field_label => $field_value) {
-		  /*replace escaped colons with actual colon*/
-			$label = str_replace('#colon#', ':', $field_label);
-			$value = str_replace('#colon#', ':', $field_value);
-			$label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($label)));
-      $value = views_json_encode_special_chars(trim(views_json_is_date($value)));
-      if (strtotime($value))
-        $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
-      $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
-      $json.=str_repeat(" ", 8).'"'.$label.'"'. " ".": ".'"'.$value.'"'.",\n";
+		  $label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($field_label)));
+          $value = views_json_encode_special_chars(trim(views_json_is_date($field_value)));
+          if (is_null($value)) break;
+          if (preg_match('/\d/', $value)) {
+            if (strtotime($value))
+              $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
+          }
+          $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
+          $json.=str_repeat(" ", 8).'"'.$label.'"'. " ".": ".'"'.$value.'"'.((++$field_count == $total_field_count) ? "":",")."\n";
 		}
-		$json.=str_repeat(" ", 6)."},\n\n";	
+		$json.=str_repeat(" ", 6)."}".((++$view_result_count == $total_view_result_count) ? "":",")."\n";	
 	}
-	$json.=str_repeat(" ", 4)."]";
-  
+	$json.=str_repeat(" ", 4)."]\n}";
+	
   if ($view->override_path) { //inside a live preview so just output the text
     print $json; 
   }
@@ -49,40 +53,28 @@ function json_simple_render($view) {
 
 function json_exhibit_render($view) {
   define('EXHIBIT_DATE_FORMAT', '%Y-%m-%d %H:%M:%S');
-  $json = "{\n".str_repeat(" ", 4).'"items"'." : ". "[\n";
+  $json = "{\n".'  "items":'."\n".str_repeat(" ", 4)."[\n";
+  $total_view_result_count = count((array)($view->result)); //cast the result object to an array so we can count how many properties in itt;
+  $view_result_count = 0;
   foreach ($view->result as $node) { 
-  	$json.=str_repeat(" ", 8)."{\n";
-  	$json.=str_repeat(" ", 12).'"type" '. " ".": ".'"'.'##type##'.'",'."\n";
-    $json.=str_repeat(" ", 12).'"label" '. " "." : ".'"'.'##label##'.'",'."\n"; 
+  	$json.=str_repeat(" ", 6)."{\n";
+  	$total_field_count = count((array)$node); //cast the node object to an array so we can count how many properties in itt
+	$field_count = 0;
     foreach($node as $field_label => $field_value) {
-      /*replace escaped colons with actual colon*/
-      $label = str_replace('#colon#', ':', $field_label);
-      $value = str_replace('#colon#', ':', $field_value);
-      $label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($label)));
-      $value = views_json_encode_special_chars(trim(views_json_is_date($value)));
-  		//if (empty($value)) continue;        
-      if (strtotime($value))
-        $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
+      $label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($field_label)));
+      $value = views_json_encode_special_chars(trim(views_json_is_date($field_value)));
+      if (is_null($value)) break;
+      if (preg_match('/\d/', $value)) {
+        if (strtotime($value))
+          $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
+      }
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
-      if ($label == 'type') $json = str_replace('##type##', $value, $json);
-      elseif ($label == 'label') $json = str_replace('##label##', $value, $json);
-      else $json.=str_repeat(" ", 12).'"'.$label.'"'. " ".": ".'"'.$value.'"'.",\n";
+      $json.=str_repeat(" ", 8).'"'.$label.'"'. " ".": ".'"'.$value.'"'.((++$field_count == $total_field_count) ? "":",")."\n";
   	}
-   if (strpos($json, '##type##') !== false) 
-    $json = str_replace('##type##', 'Item', $json);
-   if (strpos($json, '##label##') !== false) 
-    $json = str_replace('##label##',  'none', $json);    	
-   $json = rtrim($json, ",\n");
-   $json.="\n";
-   $json.=str_repeat(" ", 8)."},\n";
+    $json.=str_repeat(" ", 6)."}".((++$view_result_count == $total_view_result_count) ? "":",")."\n";
   }
-  $json = rtrim($json, ",\n");
-  $json.="\n";
   $json.=str_repeat(" ", 4)."]\n}";
-  /*
-   * The following will cause an error in a live view preview - comment out if
-   * debugging in there.
-   */
+  
   if ($view->override_path) { //inside a live preview so just output the text
   	print $json; 
   }
