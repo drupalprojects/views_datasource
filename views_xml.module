@@ -155,10 +155,12 @@ function views_xml_raw_render($vid, $nodes, $type) {
       $label = preg_replace('/\W/', '',views_xml_strip_illegal_chars($field['label'] ? $field['label'] : $fields[$field['fullname']]['name']));	
       $value = views_xml_strip_illegal_chars(views_xml_is_date(views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $node, $view)));  
       $label = str_replace("Profile", '', $label); //strip out Profile: from profile fields
+      if (preg_match('/\d/', $value)) {
         if (strtotime($value))
           $value = date(DATE_ISO8601, strtotime($value));
-        if (is_null($value) || ($value === '')) continue;
-        $xml .= "    <$label><![CDATA[$value]]></$label>\n";       
+       }
+       if (is_null($value) || ($value === '')) continue;
+       $xml .= "    <$label><![CDATA[$value]]></$label>\n";       
       }
     }
     $xml .= '  </node>'."\n";
@@ -369,7 +371,7 @@ function views_xml_strip_illegal_chars($input) {
   $output = str_replace('&', '&amp;', $output); //encode ampersand
   $output = str_replace("'", '&pos;', $output); //encode apostrophe
   $output = str_replace('<', '&lt;', $output); //encode left-angled bracket
-  $output = str_replace('>', '&rt;', $output); //encode right-angled bracket
+  $output = str_replace('>', '&gt;', $output); //encode right-angled bracket
   return $output;
 }
 
