@@ -160,6 +160,11 @@ function views_json_simple_render($vid, $nodes, $type) {
       $label = $field['label'] ? $field['label'] : $fields[$field['fullname']]['name'];
       $label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($label)));        
       $value = trim(views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $node, $view));
+      if (is_null($value)) break;
+      if (preg_match('/\d/', $value)) {
+        if (strtotime($value))
+        $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
+      }
       $value = views_json_encode_special_chars($value);
       $label = str_replace("Profile ", '', $label); //strip out Profile: from profile fields
       $json.=str_repeat(" ", 8).'"'.$label.'"'. " ".": ".'"'.$value.'"'.((++$field_count == $total_field_count) ? "":",")."\n";
@@ -204,11 +209,14 @@ function views_json_exhibit_render($vid, $nodes, $type) {
    foreach ($view->field as $field) { 
     if ($fields[$field['id']]['visible'] !== false) {
       $label = $field['label'] ? $field['label'] : $fields[$field['fullname']]['name'];
-    	$label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($label)));        
+      $label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($label)));        
       $value = trim(views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $node, $view));
-      if (strtotime($value))
-        $value = date(EXHIBIT_DATE_FORMAT, strtotime($value));
-    	$value = views_json_encode_special_chars($value);
+      if (is_null($value)) break;
+      if (preg_match('/\d/', $value)) {
+        if (strtotime($value))
+            $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
+      }
+      $value = views_json_encode_special_chars($value);
       $label = str_replace("Profile ", '', $label); //strip out Profile: from profile fields
       if ($label == 'type') $json = str_replace('##type##', $value, $json);
       elseif ($label == 'label') $json = str_replace('##label##', $value, $json);
