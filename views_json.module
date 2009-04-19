@@ -148,22 +148,26 @@ function views_json_simple_render($vid, $nodes, $type) {
   $view = views_load_view($vid);
   $result = views_build_view('items', $view);
   $fields = _views_get_fields();
-  $json = '"nodes":'.str_repeat(" ", 4)."[\n";
+  $json = "{\n  ".'"nodes":'."\n".str_repeat(" ", 4)."[\n";
+  $total_node_count = count((array)($nodes)); //cast the nodes object to an array so we can count how many properties in itt;
+  $node_count = 0;  
   foreach ($nodes as $node) {
    $json.= str_repeat(" ", 6)."{\n";
-   foreach ($view->field as $field) { 
+  $total_field_count = count((array)($view->field)); //cast the field object to an array so we can count how many properties in itt;
+  $field_count = 0;
+   foreach ($view->field as $field) {  
     if ($fields[$field['id']]['visible'] !== false) {
       $label = $field['label'] ? $field['label'] : $fields[$field['fullname']]['name'];
       $label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($label)));        
       $value = trim(views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $node, $view));
       $value = views_json_encode_special_chars($value);
       $label = str_replace("Profile ", '', $label); //strip out Profile: from profile fields
-      $json.=str_repeat(" ", 8).'"'.$label.'"'. " ".": ".'"'.$value.'"'.",\n";
+      $json.=str_repeat(" ", 8).'"'.$label.'"'. " ".": ".'"'.$value.'"'.((++$field_count == $total_field_count) ? "":",")."\n";
     }    
    }
-   $json.=str_repeat(" ", 6)."},\n\n";
+   $json.=str_repeat(" ", 6)."}".((++$node_count == $total_node_count) ? "":",")."\n\n";
   }
-  $json.=str_repeat(" ", 4)."]";
+  $json.=str_repeat(" ", 4)."]\n}";
   
   drupal_set_header('Content-Type: text/javascript');
   print $json;
@@ -176,7 +180,9 @@ function views_json_exhibit_render($vid, $nodes, $type) {
   $view = views_load_view($vid);
   $result = views_build_view('items', $view);
   $fields = _views_get_fields();
-  $json = "{\n".str_repeat(" ", 4).'"items"'." : ". "[\n";
+  $json = "{\n".'"items"'." : "."\n".str_repeat(" ", 4)."[\n";
+  $total_node_count = count((array)($nodes)); //cast the nodes object to an array so we can count how many properties in itt;
+  $node_count = 0; 
   foreach ($nodes as $node) {
   $json.= str_repeat(" ", 8)."{\n";	
    /*$items[] = array(
@@ -192,7 +198,9 @@ function views_json_exhibit_render($vid, $nodes, $type) {
    //$json.=str_repeat(" ", 12).'"type" '. " ".": ".'"'.(isset($node->type) ? $node->type : 'Item').'",'."\n";
    //$json.=str_repeat(" ", 12).'"label" '. " "." : ".'"'.(isset($node->title) ? $node->title : 'untitled').'",'."\n";
    $json.=str_repeat(" ", 12).'"type" '. " ".": ".'"'.'##type##'.'",'."\n";
-   $json.=str_repeat(" ", 12).'"label" '. " "." : ".'"'.'##label##'.'",'."\n"; 
+   $json.=str_repeat(" ", 12).'"label" '. " "." : ".'"'.'##label##'.'",'."\n";
+   $total_field_count = count((array)($view->field)); //cast the field object to an array so we can count how many properties in itt;
+   $field_count = 0;
    foreach ($view->field as $field) { 
     if ($fields[$field['id']]['visible'] !== false) {
       $label = $field['label'] ? $field['label'] : $fields[$field['fullname']]['name'];
@@ -204,26 +212,20 @@ function views_json_exhibit_render($vid, $nodes, $type) {
       $label = str_replace("Profile ", '', $label); //strip out Profile: from profile fields
       if ($label == 'type') $json = str_replace('##type##', $value, $json);
       elseif ($label == 'label') $json = str_replace('##label##', $value, $json);
-      else $json.=str_repeat(" ", 12).'"'.$label.'"'. " ".": ".'"'.$value.'"'.",\n";
+      else $json.=str_repeat(" ", 12).'"'.$label.'"'. " ".": ".'"'.$value.'"'.((++$field_count == $total_field_count) ? "":",")."\n";
     }    
    }
    if (strpos($json, '##type##') !== false) 
    	$json = str_replace('##type##', (isset($node->type) ? $node->type : 'Item'), $json);
    if (strpos($json, '##label##') !== false) 
     $json = str_replace('##label##', (isset($node->title) ? $node->title : 'none'), $json);   
-   $json = rtrim($json, ",\n");
-   $json.="\n";
-   $json.=str_repeat(" ", 8)."},\n";
+   $json.=str_repeat(" ", 8)."}".((++$node_count == $total_node_count) ? "":",")."\n\n";
   }
-  $json = rtrim($json, ",\n");
-  $json.="\n";
   $json.=str_repeat(" ", 4)."]\n}";
-  
-
-drupal_set_header('Content-Type: text/javascript');
-print $json;
-module_invoke_all('exit');
-exit;
+  drupal_set_header('Content-Type: text/javascript');
+  print $json;
+  module_invoke_all('exit');
+  exit;
 }
 
 /**
