@@ -366,13 +366,13 @@ function views_xml_strip_illegal_chars($input) {
 //        '\x{FFF9}-\x{FFFD}'. // Replacement characters
 //        '\x{0}]/u', // NULL byte
 //        '', $input);
-  $output = preg_replace('/\x((10?|[2-F])FFF[EF]|FDD[0-9A-F]|[19][0-9A-F]|7F|8[0-46-9A-F]|0?[1-8BCEF])/', '', $input);
-  $output = str_replace('"', '&quot;', $output); //encode quote
-  $output = str_replace('&', '&amp;', $output); //encode ampersand
-  $output = str_replace("'", '&pos;', $output); //encode apostrophe
-  $output = str_replace('<', '&lt;', $output); //encode left-angled bracket
-  $output = str_replace('>', '&gt;', $output); //encode right-angled bracket
-  return $output;
+//  $output = preg_replace('/\x((10?|[2-F])FFF[EF]|FDD[0-9A-F]|[19][0-9A-F]|7F|8[0-46-9A-F]|0?[1-8BCEF])/', '', $input);
+//  $output = str_replace('"', '&quot;', $output); //encode quote
+//  $output = str_replace('&', '&amp;', $output); //encode ampersand
+//  $output = str_replace("'", '&pos;', $output); //encode apostrophe
+//  $output = str_replace('<', '&lt;', $output); //encode left-angled bracket
+//  $output = str_replace('>', '&gt;', $output); //encode right-angled bracket
+  return check_plain(strip_tags($input));
 }
 
 function views_xml_is_date ($input) {
