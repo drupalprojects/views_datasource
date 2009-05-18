@@ -26,9 +26,11 @@ function xml_raw_render($view) {
     foreach($node as $label => $value) {
       $label = views_xml_strip_illegal_chars($label);
       $value = views_xml_strip_illegal_chars(views_xml_is_date($value));
-      if (is_null($value) || ($value === '') || ($value === 0)) continue;
-      if (strtotime($value))
-        $value = date(DATE_ISO8601, strtotime($value));
+      if (is_null($value) || ($value === '')) continue;
+//      if (preg_match('/\d/', $value)) {
+//        if (strtotime($value))
+//          $value = date(DATE_ISO8601, strtotime($value));
+//      }     
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
       
       $xml .= "    <$label><![CDATA[$value]]></$label>\n";
@@ -66,19 +68,20 @@ function xml_opml_render($view) {
     $xml .= '  <outline ';
     $fieldcount = 0;   
     foreach($node as $field_name=>$field_value) {
-    	$label = views_xml_strip_illegal_chars($field_name);
+      $label = views_xml_strip_illegal_chars($field_name);
       $value = views_xml_strip_illegal_chars(views_xml_is_date($field_value));
-      if (is_null($value) || ($value === '') || ($value === 0)) continue;
-    	$fieldcount++;      
+      if (is_null($value) || ($value === '')) continue;
+      $fieldcount++;      
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
-      if (is_null($value) || ($value === '') || ($value === 0)) continue;
+      if (is_null($value) || ($value === '')) continue;
       if ((strtolower($label) == 'text') || (strtolower($label) == 'node_revisions_body'))
         $label = "text";
       if (is_null($value) || ($value === '') || ($value === 0)) continue;
       if ((strtolower($label) == 'type') || (strtolower($label) == 'node_type'))
         $label = "type";  
       if ((strtolower($label) == 'id') || (strtolower($label) == 'nid')) { //if a nid is given construct the url attribute
-      	$url = $base_url.'index.php?q=node/'.$value;  
+      	//$url = $base_url.'index.php?q=node/'.$value;
+      	$url = url("node/".$value, array('absolute'=>true));  
       }
         
       if ((strtolower($label) == 'published') || (strtolower($label) == 'node_created')) {
@@ -101,8 +104,8 @@ function xml_opml_render($view) {
 	  print htmlspecialchars($xml);
 	else {  
    drupal_set_header('Content-Type: text/xml');
-   //print $xml;
-   var_dump($view);
+   print $xml;
+   //var_dump($view);
    module_invoke_all('exit');
    exit;
 	}
@@ -126,10 +129,11 @@ function xml_atom_render($view) {
     foreach($node as $field_name=>$field_value) {
       $label = views_xml_strip_illegal_chars($field_name);
       $value = views_xml_strip_illegal_chars(views_xml_is_date($field_value));
-      if (is_null($value) || ($value === '') || ($value === 0)) continue;
-      if (strtotime($value)) {//string date
-        $value = date(DATE_ISO8601, strtotime($value));
-      }
+      if (is_null($value) || ($value === '')) continue;
+//      if (preg_match('/\d/', $value)) {
+//        if (strtotime($value))
+//          $value = date(DATE_ISO8601, strtotime($value));
+//      }
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
       if (strtolower($label) == 'nid') $entry['nid'] = $value;
       if ((strtolower($label) == 'updated') || (strtolower($label) == 'updated date') || (strtolower($label) == 'node_changed')) {
