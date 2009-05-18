@@ -396,10 +396,6 @@ function views_xhtml_hCalendar_render($vid, $nodes, $type) {
       $value = views_xhtml_strip_illegal_chars(views_xhtml_is_date(views_theme_field('views_handle_field', $field['queryname'], $fields, $field, $node, $view)));  
       $label = str_replace("Profile", '', $label); //strip out Profile: from profile fields
       if (is_null($value) || ($value === '')) continue;
-      if (preg_match('/\d/', $value)) {
-        if (strtotime($value))
-          $value = date(DATE_ISO8601, strtotime($value));
-      }
   	  if (stripos($label, 'class') !== FALSE) {
         $hcalendar['class'] = $value;  
       }
@@ -413,16 +409,18 @@ function views_xhtml_hCalendar_render($vid, $nodes, $type) {
         $hcalendar['summary'] = $value; 
       }
       if ((stripos($label, 'dtstart') !== FALSE) || (stripos($label, 'event_start') !== FALSE) || (stripos($label, 'eventstarttime') !== FALSE)) {
-        if (strtotime($value))
-  	      $hcalendar['dtstart'] = date(DATE_ISO8601, strtotime($value));
-  	    else 
-  	      $hcalendar['dtstart'] = $value;        
+        if (preg_match('/\d/', $value)) {
+          if (strtotime($value))
+            $value = date(DATE_ISO8601, strtotime($value));
+        }
+  	    $hcalendar['dtstart'] = $value;        
       }
       if ((stripos($label, 'dtend') !== FALSE) || (stripos($label, 'event_end') !== FALSE) || (stripos($label, 'eventendtime') !== FALSE)) {
-        if (strtotime($value)) 
-          $hcalendar['dtend'] = date(DATE_ISO8601, strtotime($value));
-        else
-          $hcalendar['dtend'] = $value;   
+        if (preg_match('/\d/', $value)) {
+          if (strtotime($value))
+            $value = date(DATE_ISO8601, strtotime($value));
+        }
+  	    $hcalendar['dtend'] = $value;    
       }
       if (stripos($label, 'duration') !== FALSE) {
         $hcalendar['duration'] = $value; 
