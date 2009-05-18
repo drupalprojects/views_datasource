@@ -59,8 +59,6 @@ function xhtml_hcard_render($view) {
     foreach($node as $field_label => $field_value) {
       $label = views_rdf_strip_illegal_chars($field_label);
       $value = views_xml_strip_illegal_chars(views_xml_is_date($field_value));
-      if (strtotime($value))
-        $value = date(DATE_ISO8601, strtotime($value));
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
       if (is_null($value) || ($value === '')) continue;
       //$xhtml .= "$label:$value";
@@ -92,6 +90,10 @@ function xhtml_hcard_render($view) {
         $hcard['agent'][] = $value;  
       }
       if (stripos($label, 'bday') !== FALSE) {
+        if (preg_match('/\d/', $value)) {
+          if (strtotime($value))
+            $value = date(EXHIBIT_DATE_FORMAT, strtotime($value));
+        }
         $hcard['bday'] = $value;  
       }
       if (stripos($label, 'class') !== FALSE) {
@@ -249,8 +251,6 @@ function xhtml_hcalendar_render ($view) {
   	foreach($node as $field_label => $field_value) {
       $label = views_rdf_strip_illegal_chars($field_label);
       $value = views_xml_strip_illegal_chars(views_xhtml_is_date($field_value));
-      if (strtotime($value))
-        $value = date(DATE_ISO8601, strtotime($value));
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
       if (is_null($value) || ($value === '')) continue;
   	      if (stripos($label, 'class') !== FALSE) {
@@ -266,12 +266,18 @@ function xhtml_hcalendar_render ($view) {
         $hcalendar['summary'] = $value; 
       }
       if ((stripos($label, 'dtstart') !== FALSE) || (stripos($label, 'event_start') !== FALSE) || (stripos($label, 'eventstarttime') !== FALSE)) {
-        //if (strtotime($value))
-        //  $hcalendar['dtstart'] = date(DATE_ISO8601, strtotime($value));
-      $hcalendar['dtstart'] = $value;        
+        if (preg_match('/\d/', $value)) {
+          if (strtotime($value))
+            $value = date(EXHIBIT_DATE_FORMAT, strtotime($value));
+        }
+        $hcalendar['dtstart'] = $value;        
       }
       if ((stripos($label, 'dtend') !== FALSE) || (stripos($label, 'event_end') !== FALSE) || (stripos($label, 'eventendtime') !== FALSE)) {
-        if (strtotime($value)) $hcalendar['dtend'] = date(DATE_ISO8601, strtotime($value)); 
+        if (preg_match('/\d/', $value)) {
+          if (strtotime($value))
+            $value = date(EXHIBIT_DATE_FORMAT, strtotime($value));
+        }
+        $hcalendar['dtend'] = $value; 
       }
       if (stripos($label, 'duration') !== FALSE) {
         $hcalendar['duration'] = $value; 
@@ -295,6 +301,10 @@ function xhtml_hcalendar_render ($view) {
         $hcalendar['url'] = $value; 
       }
       if (stripos($label, 'last_modified') !== FALSE) {
+        if (preg_match('/\d/', $value)) {
+          if (strtotime($value))
+            $value = date(EXHIBIT_DATE_FORMAT, strtotime($value));
+        }        
         $hcalendar['last-modified'] = $value; 
       }
       if (stripos($label, 'address_type') !== FALSE) {
