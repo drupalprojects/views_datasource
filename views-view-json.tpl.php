@@ -27,11 +27,11 @@ function json_simple_render($view) {
 		foreach($node as $field_label => $field_value) {
 		  $label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($field_label)));
           $value = views_json_encode_special_chars(trim(views_json_is_date($field_value)));
-          if (is_null($value)) break;
-          if (preg_match('/\d/', $value)) {
-            if (strtotime($value))
-              $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
-          }
+          if ((is_null($value)) || ($value == '')) continue;
+//          if (preg_match('/\d/', $value)) {
+//            if (strtotime($value))
+//              $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
+//          }
           $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
           $json.=str_repeat(" ", 8).'"'.$label.'"'. " ".": ".'"'.$value.'"'.((++$field_count == $total_field_count) ? "":",")."\n";
 		}
@@ -58,20 +58,28 @@ function json_exhibit_render($view) {
   $view_result_count = 0;
   foreach ($view->result as $node) { 
   	$json.=str_repeat(" ", 6)."{\n";
+    $json.=str_repeat(" ", 8).'"type" '. " ".": ".'"'.'##type##'.'",'."\n";
+    $json.=str_repeat(" ", 8).'"label" '. " "." : ".'"'.'##label##'.'",'."\n";
   	$total_field_count = count((array)$node); //cast the node object to an array so we can count how many properties in itt
 	$field_count = 0;
     foreach($node as $field_label => $field_value) {
       $label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($field_label)));
       $value = views_json_encode_special_chars(trim(views_json_is_date($field_value)));
-      if (is_null($value)) break;
-      if (preg_match('/\d/', $value)) {
-        if (strtotime($value))
-          $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
-      }
+      if ((is_null($value)) || ($value == '')) continue;
+//      if (preg_match('/\d/', $value)) {
+//        if (strtotime($value))
+//          $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
+//      }
       $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label)); //strip out Profile: from profile fields
-      $json.=str_repeat(" ", 8).'"'.$label.'"'. " ".": ".'"'.$value.'"'.((++$field_count == $total_field_count) ? "":",")."\n";
+      if ($label == 'type') $json = str_replace('##type##', $value, $json);
+      elseif ($label == 'label') $json = str_replace('##label##', $value, $json);
+      else $json.=str_repeat(" ", 8).'"'.$label.'"'. " ".": ".'"'.$value.'"'.((++$field_count == $total_field_count) ? "":",")."\n";
   	}
-    $json.=str_repeat(" ", 6)."}".((++$view_result_count == $total_view_result_count) ? "":",")."\n";
+    if (strpos($json, '##type##') !== false) 
+   	$json = str_replace('##type##', (isset($node->type) ? $node->type : 'Item'), $json);
+    if (strpos($json, '##label##') !== false) 
+    $json = str_replace('##label##', (isset($node->title) ? $node->title : 'none'), $json);
+  	$json.=str_repeat(" ", 6)."}".((++$view_result_count == $total_view_result_count) ? "":",")."\n";
   }
   $json.=str_repeat(" ", 4)."]\n}";
   
