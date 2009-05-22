@@ -36,8 +36,8 @@ function rdf_foaf_xml_render($view) {
       $label = views_rdf_strip_illegal_chars($field_label);
       $value = views_xml_strip_illegal_chars(views_xml_is_date($field_value));
       if (is_null($value) || ($value === '')) continue;
-      if (strtotime($value))
-        $value = date(DATE_ISO8601, strtotime($value));
+//      if (strtotime($value))
+//        $value = date(DATE_ISO8601, strtotime($value));
       if (stripos($label, 'firstname') !== false) {
         $xml.="  <foaf:firstName>$value</foaf:firstName>\n";
         continue;
@@ -328,8 +328,8 @@ function rdf_sioc_xml_user_render($node, $uid=null, $user_name=null, $user_email
       $label = views_rdf_strip_illegal_chars($field_label);
       $value = views_xml_strip_illegal_chars(views_xml_is_date($field_value));
       if (is_null($value) || ($value === '')) continue;
-      if (strtotime($value))
-        $value = date(DATE_ISO8601, strtotime($value));
+//      if (strtotime($value))
+//        $value = date(DATE_ISO8601, strtotime($value));
       if ((strtolower($label) == 'id') || (strtolower($label) == 'uid')) {
         $uid = $value;      
       }
@@ -373,8 +373,8 @@ function rdf_sioc_xml_node_render($node, &$users=null, &$nodes = null) {
     $label = views_rdf_strip_illegal_chars($field_label);
     $value = views_rdf_strip_illegal_chars(views_rdf_is_date($field_value));
     if (is_null($value) || ($value === '')) continue;
-    if (strtotime($value))
-      $value = date(DATE_ISO8601, strtotime($value));
+//    if (strtotime($value))
+//      $value = date(DATE_ISO8601, strtotime($value));
     if ((strtolower($label) == 'id') || (strtolower($label) == 'nid')) {
       $nid = $value;      
     }
