@@ -24,12 +24,12 @@ function views_xhtml_strip_illegal_chars($input) {
         '\x{FFF9}-\x{FFFD}'. // Replacement characters
         '\x{0}]/u', // NULL byte
         '', $input);
-  $output = str_replace('"', '&quot;', $output); //encode quote
-  $output = str_replace('&', '&amp;', $output); //encode ampersand
-  $output = str_replace("'", '&pos;', $output); //encode apostrophe
-  $output = str_replace('<', '&lt;', $output); //encode left-angled bracket
-  $output = str_replace('>', '&rt;', $output); //encode right-angled bracket
-  return $output;
+//  $output = str_replace('"', '&quot;', $output); //encode quote
+//  $output = str_replace('&', '&amp;', $output); //encode ampersand
+//  $output = str_replace("'", '&pos;', $output); //encode apostrophe
+//  $output = str_replace('<', '&lt;', $output); //encode left-angled bracket
+//  $output = str_replace('>', '&rt;', $output); //encode right-angled bracket
+  return check_plain(strip_tags($output));
 }
 
 function views_xhtml_is_date ($input) {
