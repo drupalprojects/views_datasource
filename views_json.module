@@ -21,7 +21,7 @@ function views_json_strip_illegal_chars($input) {
                         '\x{0}]/u', // NULL byte
         '', $output);
 
- return $output;  
+ return check_plain(strip_tags($output));;  
 }
 
 /**
@@ -40,7 +40,6 @@ function views_json_encode_special_chars($input) {
   $output = str_replace(chr(10), '\n', $output);
   $output = str_replace(chr(13), '\r', $output);
   $output = str_replace(chr(9), '\t', $output);
-  return $output;
 }
 
 /**
