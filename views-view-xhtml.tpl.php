@@ -92,7 +92,7 @@ function xhtml_hcard_render($view) {
       if (stripos($label, 'bday') !== FALSE) {
         if (preg_match('/\d/', $value)) {
           if (strtotime($value))
-            $value = date(EXHIBIT_DATE_FORMAT, strtotime($value));
+            $value = date(DATE_ISO8601, strtotime($value));
         }
         $hcard['bday'] = $value;  
       }
@@ -268,14 +268,14 @@ function xhtml_hcalendar_render ($view) {
       if ((stripos($label, 'dtstart') !== FALSE) || (stripos($label, 'event_start') !== FALSE) || (stripos($label, 'eventstarttime') !== FALSE)) {
         if (preg_match('/\d/', $value)) {
           if (strtotime($value))
-            $value = date(EXHIBIT_DATE_FORMAT, strtotime($value));
+            $value = date(DATE_ISO8601, strtotime($value));
         }
         $hcalendar['dtstart'] = $value;        
       }
       if ((stripos($label, 'dtend') !== FALSE) || (stripos($label, 'event_end') !== FALSE) || (stripos($label, 'eventendtime') !== FALSE)) {
         if (preg_match('/\d/', $value)) {
           if (strtotime($value))
-            $value = date(EXHIBIT_DATE_FORMAT, strtotime($value));
+            $value = date(DATE_ISO8601, strtotime($value));
         }
         $hcalendar['dtend'] = $value; 
       }
@@ -303,7 +303,7 @@ function xhtml_hcalendar_render ($view) {
       if (stripos($label, 'last_modified') !== FALSE) {
         if (preg_match('/\d/', $value)) {
           if (strtotime($value))
-            $value = date(EXHIBIT_DATE_FORMAT, strtotime($value));
+            $value = date(DATE_ISO8601, strtotime($value));
         }        
         $hcalendar['last-modified'] = $value; 
       }
