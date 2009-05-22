@@ -380,6 +380,7 @@ function views_rdf_sioc_xml_render($vid, $nodes, $type) {
   //var_dump(user_load(array('name' => $users_name)));
   $xml .= implode("", $users_xml);
   $xml .= implode("", $nodes_xml);
+  drupal_set_header('Content-Type: application/rdf+xml');
   print $xml;
   module_invoke_all('exit');
   exit;
