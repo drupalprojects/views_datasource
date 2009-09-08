@@ -6,6 +6,12 @@
  @see views_rdf.views.inc
 */
 
+function views_rdf_views_api() {
+  return array(
+    'api' => 2,
+  );
+}
+
 /**
  * Renders a single user from a view in the
  *

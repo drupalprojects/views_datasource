@@ -13,6 +13,7 @@
  */
 function views_json_views_plugins() {
   return array(
+    'module' => 'views_json',
     'style' => array( //declare the views_json style plugin
       'views_json' => array(
         'title' => t('JSON data document'),
@@ -26,37 +27,6 @@ function views_json_views_plugins() {
       ),
     ),
   );
-}
-
-/**
- * Implementation of views_plugin_style
- *
- */
-
-class views_plugin_style_json extends views_plugin_style {
-  
-  /**
-   * Set default options
-   */
-  function options(&$options) {
-    $options['format'] = 'Simple';
-  }
-  
-  /**
-   * Provide a form for setting options.
-   *
-   * @param array $form
-   * @param array $form_state
-   */  
-  function options_form(&$form, &$form_state) {
-    $form['format'] = array(
-      '#type' => 'radios',
-      '#title' => t('JSON data format'),
-      '#options' => array('Simple' => t('Simple'), 'Exhibit' => t('MIT Simile/Exhibit')),
-      '#default_value' => $this->options['format'],
-    );
-  }
-
 }
 
 /**

@@ -6,6 +6,14 @@
  @see views_json.views.inc
 */
 
+function views_json_views_api() {
+  return array(
+    'api' => 2,
+    /*'path' => drupal_get_path('module', 'views_json'),*/
+  );
+}
+
+
 /**
  * Strips illegal JSON characters in identifier string
  *
@@ -40,6 +48,7 @@ function views_json_encode_special_chars($input) {
   $output = str_replace(chr(10), '\n', $output);
   $output = str_replace(chr(13), '\r', $output);
   $output = str_replace(chr(9), '\t', $output);
+  return $output;
 }
 
 /**
