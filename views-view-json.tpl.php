@@ -51,6 +51,7 @@ function json_simple_render($view) {
 	
 }
 
+
 function json_exhibit_render($view) {
   define('EXHIBIT_DATE_FORMAT', '%Y-%m-%d %H:%M:%S');
   $json = "{\n".'  "items":'."\n".str_repeat(" ", 4)."[\n";
