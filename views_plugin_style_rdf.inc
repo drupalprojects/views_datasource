@@ -18,7 +18,7 @@ class views_plugin_style_rdf extends views_plugin_style {
     $form['vocabulary'] = array(
       '#type' => 'radios',
       '#title' => t('RDF vocabulary'),
-      '#options' => array('FOAF' => t('FOAF')),
+      '#options' => array('FOAF' => t('FOAF'), 'SIOC' => t('SIOC')),
       '#default_value' => $this->options['vocabulary'],
     );
   }
