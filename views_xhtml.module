@@ -32,7 +32,7 @@ function views_xhtml_strip_illegal_chars($input) {
         '', $input);
   $output = str_replace('"', '&quot;', $output); //encode quote
   $output = str_replace('&', '&amp;', $output); //encode ampersand
-  $output = str_replace("'", '&pos;', $output); //encode apostrophe
+  $output = str_replace("'", '&apos;', $output); //encode apostrophe
   $output = str_replace('<', '&lt;', $output); //encode left-angled bracket
   $output = str_replace('>', '&rt;', $output); //encode right-angled bracket
   return $output;
