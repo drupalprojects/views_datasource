@@ -170,7 +170,7 @@ function xml_atom_render($view) {
    	  $entry['link'] = $base_url.'/index.php?q=node/'.$entry['nid'];
     }
     else {
-      print ('<b style="color:red">The fields "nid", "title", "published", and "updated" must exist.');
+      print ('<b style="color:red">The fields "nid", "title", "post date", and "updated date" must exist.');
       return;  
     }
     $link = $entry['link'];
