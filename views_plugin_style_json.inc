@@ -1,10 +1,14 @@
 <?php
+//$Id$
+/**
+ * @file
+ * Implementation of views_plugin_style for views_json
+ */
 
 /**
  * Implementation of views_plugin_style
  *
  */
-
 class views_plugin_style_json extends views_plugin_style {
   
   /**

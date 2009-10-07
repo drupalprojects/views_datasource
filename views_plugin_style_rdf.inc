@@ -1,4 +1,14 @@
 <?php
+//$Id$
+/**
+ * @file
+ * Implementation of views_plugin_style for views_rdf
+ */
+
+/**
+ * Implementation of views_plugin_style
+ *
+ */
 class views_plugin_style_rdf extends views_plugin_style {
   
   /**

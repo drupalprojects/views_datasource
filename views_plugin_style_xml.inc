@@ -1,4 +1,15 @@
 <?php
+//$Id$
+/**
+ * @file
+ * Implementation of views_plugin_style for views_xml
+ */
+
+
+/**
+ * Implementation of views_plugin_style
+ *
+ */
 class views_plugin_style_xml extends views_plugin_style {
   
   /**
