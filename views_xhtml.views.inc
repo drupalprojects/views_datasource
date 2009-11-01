@@ -1,38 +1,42 @@
 <?php
-//$Id$
+// $Id$
+
 /**
- * @file views_xhtml.views.inc 
+ * @file
  * Views style plugin to render nodes as XHTML microformats.
+ *
  * @see views-view-xhtml.tpl.php
  * @ingroup views_plugins
  */
 
+
 /**
- * Implementation of hook_views_plugin
- *
+ * Implementation of hook_views_plugin().
  */
 function views_xhtml_views_plugins() {
   return array(
-    'module' => views_xhtml,
-	'style' => array( //declare the views_xhtml style plugin
+    'module'  => views_xhtml,
+    'style'   => array(                 // declare the views_xhtml style plugin
       'views_xhtml' => array(
-        'title' => t('XHTML data document'),
-        'theme' => 'views_view_xhtml',
-        'help' => t('Displays nodes as XHTML microformats.'),
-        'handler' => 'views_plugin_style_xhtml',
+        'title'           => t('XHTML data document'),
+        'theme'           => 'views_view_xhtml',
+        'help'            => t('Displays nodes as XHTML microformats.'),
+        'handler'         => 'views_plugin_style_xhtml',
         'uses row plugin' => TRUE,
-        'uses fields' => TRUE,
-        'uses options' => TRUE,
-        'type' => 'normal',       
+        'uses fields'     => TRUE,
+        'uses options'    => TRUE,
+        'type'            => 'normal',
       ),
     ),
   );
 }
 
+
 /**
  * Theme preprocess function for views-view-xhtml.tpl.php
  *
- * @param array $vars
+ * @param $vars
+ *   Template variables.
  */
 function template_preprocess_views_view_xhtml(&$vars) {
   $view     = &$vars['view'];
