@@ -15,180 +15,177 @@
  */
 
 
-switch ($options['format']) {
-  // Simple (Coder)
-  case 'simple-coder':
-    json_simple_render($view, TRUE);
-    break;
+$options['displaying_output'] = $view->override_path;
 
-  // MIT Simile/Exhibit
-  case 'exhibit':
-    json_exhibit_render($view);
-    break;
-
-  // MIT Simile/Exhibit (Coder)
-  case 'exhibit-coder':
-    json_exhibit_render($view, TRUE);
-    break;
-
-  // Simple
-  default:
-    json_simple_render($view);
-}
+json_render($view->result, $options);
 
 
-function json_simple_render($view, $coder_mode = FALSE) {
-  define('EXHIBIT_DATE_FORMAT', '%Y-%m-%d %H:%M:%S');
+/**
+ * Render JSON.
+ *
+ * The function will directly output a JSON string instead of returning it.
+ *
+ * @param $items
+ *   The collection of items to encode into JSON.
+ * @param $options
+ *   Render options.
+ */
+function json_render($items, $options) {
+  $obj = new stdClass();
 
-  $eol      = '';
-  $spaces1  = '';
-  $spaces2  = '';
-  $spaces4  = '';
+  // do some preprocessing if necessary
 
-  if ($view->override_path) {
-    // inside a live preview so use HTML line breaks and space accordingly
-    $eol      = '<br />';
-    $spaces1  = ' ';
-    $spaces2  = str_repeat('&nbsp;', 2);
-    $spaces4  = str_repeat('&nbsp;', 4);
-  }
+  if ($options['format'] === 'exhibit') {
+    // we'll be rendering MIT Simile/Exhibit JSON
 
-  $json = '{' . $spaces1 .'"nodes"'. $spaces1 .':'. $spaces1 .'['. $eol;
-
-  $more_view_results = FALSE;
-  foreach ($view->result as $node) {
-    $json .= ($more_view_results ? ','. $eol : '') . $spaces2 .'{'. $eol;
-
-    $more_fields = FALSE;
-    foreach ($node as $field_label => $field_value) {
-      $label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($field_label)));
-      $value = views_json_encode_special_chars(trim(views_json_is_date($field_value)));
-      if ((is_null($value)) || ($value == '')) continue;
-
-//    if (preg_match('/\d/', $value)) {
-//      if (strtotime($value)) {
-//        $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
-//      }
-//    }
-
-      // strip out Profile: from profile fields
-      $label = str_replace('_value', '', str_replace('profile_values_profile_', '', $label));
-
-      if ($view->override_path) {
-        $value = check_plain($value);
+    // add required fields
+    $num_items = count($items);
+    for ($i = 0; $i < $num_items; ++$i) {
+      if (!isset($items[$i]->type)) {
+        $items[$i]->type = (isset($node->type) ? $node->type : 'Item');
       }
-
-      $json .= ($more_fields ? ','. $eol : '') . $spaces4 .'"'. $label .'"'. $spaces1 .':'. $spaces1 .'"'. $value .'"';
-
-      $more_fields = TRUE;
+      if (!isset($items[$i]->label)) {
+        $items[$i]->label = (isset($node->type) ? $node->title : 'none');
+      }
     }
 
-    $json .= $eol . $spaces2 .'}';
-
-    $more_view_results = TRUE;
-  }
-
-  $json .= ']'. $spaces1 .'}';
-
-  if ($view->override_path) {
-    // we're inside a live preview so pretty-print the JSON
-    print '<code>'. $json .'</code>';
-  }
-  elseif ($coder_mode) {
-    // we're in "coder" mode so just output the JSON
-    print $json;
+    $obj->items = $items;
   }
   else {
-    // we're in callback mode so switch the content type and stop further processing of the page
-    drupal_set_header('Content-Type: text/javascript');
-    print $json;
-    module_invoke_all('exit');
-    exit;
+    // we'll be rendering regular JSON
+    $obj->nodes = $items;
+  }
+
+  // render the output
+  if ($options['displaying_output']) {
+    // we're inside a live preview where the JSON is pretty-printed
+    print '<code>'. _json_preview_render($obj) .'</code>';
+  }
+  else {
+    if (function_exists('json_encode')) {
+      $json = json_encode($obj);
+    }
+    else {
+      $json = _json_render($obj);
+    }
+
+    if ($options['using_coder']) {
+      // we're in "coder" mode
+      print $json;
+    }
+    else {
+      // we want to send the JSON as a server response so switch the content type
+      // and stop further processing of the page.
+      drupal_set_header('Content-Type: application/json');
+      print $json;
+      module_invoke_all('exit');
+      exit;
+    }
   }
 }
 
 
-function json_exhibit_render($view, $coder_mode = FALSE) {
-  define('EXHIBIT_DATE_FORMAT', '%Y-%m-%d %H:%M:%S');
+/**
+ * Helper function that builds the JSON.
+ */
+function _json_render($var) {
+//  define('EXHIBIT_DATE_FORMAT', '%Y-%m-%d %H:%M:%S');
 
-  $eol      = '';
-  $spaces1  = '';
-  $spaces2  = '';
-  $spaces4  = '';
-
-  if ($view->override_path) {
-    // inside a live preview so use HTML line breaks and space accordingly
-    $eol      = '<br />';
-    $spaces1  = ' ';
-    $spaces2  = str_repeat('&nbsp;', 2);
-    $spaces4  = str_repeat('&nbsp;', 4);
-  }
-
-  $json = '{' . $spaces1 .'"items"'. $spaces1 .':'. $spaces1 .'['. $eol;
-
-  $more_view_results = FALSE;
-  foreach ($view->result as $node) {
-    $json .= ($more_view_results ? ','. $eol : '') . $spaces2 .'{'. $eol;
-    $json .= $spaces4 .'"type"'. $spaces1 .':'. $spaces1 .'"'.'##type##'.'",'. $eol;
-    $json .= $spaces4 .'"label"'. $spaces1 .':'. $spaces1 .'"'.'##label##'.'",'. $eol;
-
-    $more_fields = FALSE;
-    foreach ($node as $field_label => $field_value) {
-      $label = trim(views_json_strip_illegal_chars(views_json_encode_special_chars($field_label)));
-      $value = views_json_encode_special_chars(trim(views_json_is_date($field_value)));
-      if ((is_null($value)) || ($value == '')) continue;
-
-//    if (preg_match('/\d/', $value)) {
-//      if (strtotime($value)) {
-//        $value = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
+  // hack of the elegant drupal_to_js() function
+  switch (gettype($var)) {
+    case 'boolean':
+      // lowercase is necessary!
+      return $var ? 'true' : 'false';
+    case 'integer':
+    case 'double':
+      return $var;
+    case 'resource':
+    case 'string':
+//      if (preg_match('/\d/', $var)) {
+//        if (strtotime($var)) {
+//          $var = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
+//        }
 //      }
-//    }
 
-      // strip out Profile: from profile fields
-      $label = str_replace('_value', '', str_replace('profile_values_profile_', '', $label));
-
-      if ($view->override_path) {
-        $value = check_plain($value);
+      $value = views_json_encode_special_chars(trim(views_json_is_date($var)));
+//      $value = str_replace(array("\r", "\n", "<", ">", "&"),
+//                           array('\r', '\n', '\x3c', '\x3e', '\x26'),
+//                           addslashes($value));
+      return '"'. $value .'"';
+    case 'array':
+      // Arrays in JSON can't be associative.  If the array is empty or if it
+      // has sequential whole number keys starting with 0, it's not associative
+      // so we can go ahead and convert it as an array.
+      if (empty($var) || array_keys($var) === range(0, sizeof($var) - 1)) {
+        $output = array();
+        foreach ($var as $v) {
+          $output[] = _json_render($v);
+        }
+        return '['. implode(',', $output) .']';
       }
-
-      if ($label == 'type') {
-        $json = str_replace('##type##', $value, $json);
+      // Otherwise, fall through to convert the array as an object.
+    case 'object':
+      $output = array();
+      foreach ($var as $k => $v) {
+        $output[] = trim(views_json_check_label(_json_render(strval($k)))) .':'. _json_render($v);
       }
-      elseif ($label == 'label') {
-        $json = str_replace('##label##', $value, $json);
-      }
-      else {
-        $json .= ($more_fields ? ','. $eol : '') . $spaces4 .'"'. $label .'"'. $spaces1 .':'. $spaces1 .'"'. $value .'"';
-      }
-    }
-
-    if (strpos($json, '##type##') !== FALSE) {
-      $json = str_replace('##type##', (isset($node->type) ? $node->type : 'Item'), $json);
-    }
-    if (strpos($json, '##label##') !== FALSE) {
-      $json = str_replace('##label##', (isset($node->title) ? $node->title : 'none'), $json);
-    }
-
-    $json .= $eol . $spaces2 .'}';
-
-    $more_view_results = TRUE;
+      return '{'. implode(',', $output) .'}';
+    default:
+      return 'null';
   }
+}
 
-  $json .= ']'. $spaces1 .'}';
 
-  if ($view->override_path) {
-    // we're inside a live preview so pretty-print the JSON
-    print '<code>'. $json .'</code>';
-  }
-  elseif ($coder_mode) {
-    // we're in "coder" mode so just output the JSON
-    print $json;
-  }
-  else {
-    // we're in callback mode so switch the content type and stop further processing of the page
-    drupal_set_header('Content-Type: text/javascript');
-    print $json;
-    module_invoke_all('exit');
-    exit;
+/**
+ * Helper function that builds pretty-printed JSON.
+ */
+function _json_preview_render($var, $depth = 0) {
+//  define('EXHIBIT_DATE_FORMAT', '%Y-%m-%d %H:%M:%S');
+
+  $base_indent  = '&nbsp;&nbsp;';
+  $eol          = '<br />';
+  $indent       = str_repeat($base_indent, $depth);
+
+  // hack of the elegant drupal_to_js() function
+  switch (gettype($var)) {
+    case 'boolean':
+      // lowercase is necessary!
+      return $var ? 'true' : 'false';
+    case 'integer':
+    case 'double':
+      return $var;
+    case 'resource':
+    case 'string':
+//      if (preg_match('/\d/', $var)) {
+//        if (strtotime($var)) {
+//          $var = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
+//        }
+//      }
+
+      $value = views_json_encode_special_chars(trim(views_json_is_date($var)));
+//      $value = str_replace(array("\r", "\n", "<", ">", "&"),
+//                           array('\r', '\n', '\x3c', '\x3e', '\x26'),
+//                           addslashes($value));
+      return '"'. check_plain($value) .'"';
+    case 'array':
+      // Arrays in JSON can't be associative.  If the array is empty or if it
+      // has sequential whole number keys starting with 0, it's not associative
+      // so we can go ahead and convert it as an array.
+      if (empty($var) || array_keys($var) === range(0, sizeof($var) - 1)) {
+        $output = array();
+        foreach ($var as $v) {
+          $output[] = $indent . $base_indent . _json_preview_render($v, $depth + 1);
+        }
+        return '['. (!empty($output) ? $eol . implode(','. $eol, $output) . $eol . $indent : '') .']';
+      }
+      // Otherwise, fall through to convert the array as an object.
+    case 'object':
+      $output = array();
+      foreach ($var as $k => $v) {
+        $output[] = $indent . $base_indent . trim(views_json_check_label(_json_preview_render(strval($k)))) .' : '. _json_preview_render($v, $depth + 1);
+      }
+      return '{'. (!empty($output) ? $eol . implode(','. $eol, $output) . $eol . $indent : '') .'}';
+    default:
+      return 'null';
   }
 }
