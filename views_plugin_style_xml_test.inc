@@ -10,11 +10,9 @@
 /**
  * Implementation of views_plugin_style
  */
-class views_plugin_style_xml extends views_plugin_style {
+class views_plugin_style_xml_test extends views_plugin_style {
 
-  /** Implementation of views_plugin_style::option_definition 
-    */ 
-	function option_definition() {
+  function option_definition() {
     $options = parent::option_definition();
     $options['schema'] = array('default' => 'raw', 'translatable' => TRUE);
     $options['root_element'] = array('default' => 'node', 'translatable' => TRUE);
@@ -24,6 +22,7 @@ class views_plugin_style_xml extends views_plugin_style {
     return $options;
   }
   
+
   /**
    * Provide a form for setting options.
    *
@@ -72,16 +71,13 @@ class views_plugin_style_xml extends views_plugin_style {
     );       
   } 
  	
-  /**
-   * Implementation of view_style_plugin::render()
-   */
   function render() {
   	$view = &$this->view;
   	$options = $this->options;
   	$field = $view->field;
-  	//views_xml_debug_stop($view->result);
-  	//views_xml_debug_stop($field["body"]->options["label"]);
-  	//view_xml_debug($field["body"]-)
+  	//views_xml_test_debug_stop($view->result);
+  	//views_xml_test_debug_stop($field["body"]->options["label"]);
+  	//view_xml_test_debug($field["body"]-)
   	/*
  	  if (empty($this->row_plugin)) {
  	    vpr('views_plugin_style_xml_test: Views XML: The row plugin for this style must be the XML element plugin.');
@@ -99,10 +95,10 @@ class views_plugin_style_xml extends views_plugin_style {
  	  $rows = array();
  	 
     foreach ($view->result as $row) {
-    //views_xml_debug_stop($row);
-      $rows[] = _views_xml_render_fields($view, $row);
+    //views_xml_test_debug_stop($row);
+      $rows[] = _views_xml_test_render_fields($view, $row);
     }
-    //views_xml_debug_stop($rows);
+    //views_xml_test_debug_stop($rows);
  	  return theme($this->theme_functions(), $this->view, $rows, $this->attachment, $this->options); 	  
  	}
  

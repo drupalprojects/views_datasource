@@ -5,7 +5,7 @@
  * @file
  * Views style plugins to render nodes in the XML data format.
  *
- * @see views-view-xml.tpl.php
+ * @see views_plugin_style_xml.inc
  * @ingroup views_plugins
  */
 
@@ -14,33 +14,24 @@
  * Implementation of hook_views_plugin().
  */
 function views_xml_views_plugins() {
-  return array(
-    'module'  => views_xml,
-    'style'   => array(                 // declare the views_xml_* style plugins
-      'views_xml' => array(
-        'title'           => t('XML data document'),
-        'theme'           => 'views_view_xml',
-        'help'            => t('Displays nodes as XML.'),
-        'handler'         => 'views_plugin_style_xml',
-        'uses row plugin' => TRUE,
-        'uses fields'     => TRUE,
-        'uses options'    => TRUE,
-        'type'            => 'normal',
-      ),
-    ),
-  );
-}
-
-
-/**
- * Theme preprocess function for views-view-xml.tpl.php
- *
- * @param $vars
- *   Template variables.
- */
-function template_preprocess_views_view_xml(&$vars) {
-  $view     = &$vars['view'];
-  $options  = $view->style_handler->options;
-  $handler  = $view->style_handler;
-  $result   = array();
+  $path = drupal_get_path('module', 'views_xml'); 
+	return array(
+	   'module' => 'views_xml',
+      'style'   => array(                 // declare the views_xml_* style plugins
+        'views_xml_style' => array(
+          'title'           => t('XML data document'),
+	        'path'            => $path,
+          'help'            => t('Display a view as an XML document.'),
+          'handler'         => 'views_plugin_style_xml',
+	        'theme'           => 'views_views_xml_style',
+	        'theme file'      => 'views_views_xml_style.theme.inc',
+	        'theme path'      => $path.'/theme',
+          'uses row plugin' => FALSE,
+          'uses fields'     => TRUE,
+          'uses options'    => TRUE,
+	        'type'            => 'normal',
+	        'help_topic'      => 'style-xml'
+       ),
+     ),
+    );
 }

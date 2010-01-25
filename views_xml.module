@@ -8,13 +8,80 @@
  * @see views_xml.views.inc
  */
 
-
 function views_xml_views_api() {
   return array(
     'api' => 2,
+    'path' => drupal_get_path('module', 'views_xml'), 
   );
 }
 
+/** 
+ * Implementation of hook_theme().
+ */
+
+function views_xml_theme() {
+   $path = drupal_get_path('module', 'views_xml') .'/theme';
+   return array(
+     'views_views_xml_style' => array(
+       'arguments' => array('view' => NULL, 'rows' => array(), 'attachment'=>NULL, 'options' => array()),
+       'path' => $path,
+       'file' => 'views_views_xml_style.theme.inc',
+     ),
+     'views_views_xml_style_raw' => array(
+       'arguments' => array('view' => NULL, 'rows' => array(), 'attachment' => NULL, 'options'=>array()),  
+       'path' => $path,
+       'file' => 'views_views_xml_style.theme.inc',
+       'template' => 'views-views-xml-style-raw'
+            
+     ),/**   
+     'views_view_xml_test_opml_style' => array(
+       'template' => 'views_view_xml_test_opml_style',
+       'path' => $path,
+       'arguments' => array('view' => NULL, 'rows' => array(), 'attachment' => NULL, 'options' => array()),
+     ),
+     'views_view_xml_test_atom_style' => array(
+       'template' => 'views_view_xml_test_atom_style',
+       'path' => $path,
+       'arguments' => array('view' => NULL, 'row' => array(), 'attachment' => NULL, 'options' => array()),
+     ),*/
+   );
+}  
+
+/**
+ * Takes each field from a row object and renders the field as determined by the field's theme 
+ * 
+ * @param $view
+ * 	 View the row belongs to 
+ * @param $row
+ *   Row object
+ * @return array
+ *   Object containing all the raw and rendered fields  
+ */
+
+function _views_xml_render_fields(&$view, $row) {
+  $rendered_fields = array();
+  $field_ids = array_keys($view->field);
+  
+  foreach ($field_ids as $id) {
+    $field = &$view->field[$id];
+    $field_output = $field->theme($row);
+    if (empty($field->options['exclude'])) {
+      $object = new stdClass();
+      $object->id = $id;
+      $object->content = $field_output;
+      if (isset($view->field[$id]->field_alias) && isset($row->{$view->field[$id]->field_alias})) {
+        $object->raw = $row->{$view->field[$id]->field_alias};
+      }
+      else {
+        $object->raw = NULL; // make sure it exists to reduce NOTICE
+      }
+      $object->class = views_css_safe($id);
+      $object->label = check_plain($view->field[$id]->label());
+      $rendered_fields[$id] = $object;
+    }
+  }
+  return $rendered_fields;
+}
 
 /**
  * Strips illegal Unicode characters and encodes entities in string
@@ -24,13 +91,26 @@ function views_xml_views_api() {
  * @return
  *   String with illegal characters stripped away and entities encoded.
  */
-function views_xml_strip_illegal_chars($input) {
+function views_xml_strip_illegal_field_chars($input) {
   $output = preg_replace('/\x((10?|[2-F])FFF[EF]|FDD[0-9A-F]|[19][0-9A-F]|7F|8[0-46-9A-F]|0?[1-8BCEF])/', '', $input);
   $output = str_replace('"', '&quot;', $output);      // encode quote
   $output = str_replace('&', '&amp;', $output);       // encode ampersand
   $output = str_replace("'", '&apos;', $output);      // encode apostrophe
   $output = str_replace('<', '&lt;', $output);        // encode left-angled bracket
   $output = str_replace('>', '&rt;', $output);        // encode right-angled bracket
+  return $output;
+}
+
+/**
+ * Strips characters not matching the XML Name production: 
+ *
+ * @param $input
+ *   String to process.
+ * @return
+ *   String with illegal characters stripped.
+ */
+function _views_xml_strip_illegal_xml_name_chars($input) {
+  $output = preg_replace("/(^xml)|([^A-Za-z0-9_\-\.:])/", "", $input);
   return $output;
 }
 
@@ -51,4 +131,180 @@ function views_xml_is_date($input) {
     $date = unserialize($input);
     return format_date(mktime(0, 0, 0, $date['month'], $date['day'], $date['year']), 'custom', DATE_ISO8601);
   }
+}
+
+function xml_opml_render($view) {
+  // var_dump($view);
+  // return;
+  global $user;
+  global $base_url;
+  $xml .= '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
+  $xml .= '<!-- generator="Drupal Views_Datasource.Module" -->'."\n";
+  $xml .='<opml version="2.0">'."\n";
+  $xml .='<head>'."\n";
+  $xml .='  <title>'. variable_get('site_name', 'drupal') .'-'. $view->name .'</title>'."\n";
+  $xml .='  <ownerName>'. $user->name .'</ownerName>'."\n";
+  $xml .='  <ownerEmail>'. $user->mail .'</ownerEmail>'."\n";
+  $xml .='  <docs>'. $base_url .'</docs>';
+  $xml .='  <dateCreated>'. format_date(time(), 'custom', DATE_ISO8601) .'</dateCreated>'."\n";
+  $xml .='</head>'."\n";
+  $xml .='<body>'."\n";
+  foreach ($view->result as $node) {
+    $xml .= '  <outline ';
+    $fieldcount = 0;
+    foreach ($node as $field_name => $field_value) {
+      $label = views_xml_strip_illegal_chars($field_name);
+      $value = views_xml_strip_illegal_chars(views_xml_is_date($field_value));
+      if (is_null($value) || ($value === '')) continue;
+      $fieldcount++;
+      $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label));       // strip out Profile: from profile fields
+      if (is_null($value) || ($value === '')) continue;
+      if ((drupal_strtolower($label) == 'text') || (drupal_strtolower($label) == 'node_revisions_body'))
+        $label = "text";
+      if (is_null($value) || ($value === '') || ($value === 0)) continue;
+      if ((drupal_strtolower($label) == 'type') || (drupal_strtolower($label) == 'node_type'))
+        $label = "type";
+      if ((drupal_strtolower($label) == 'id') || (drupal_strtolower($label) == 'nid')) {      // if a nid is given construct the url attribute
+        // $url = $base_url .'index.php?q=node/'. $value;
+        $url = url("node/". $value, array('absolute' => TRUE));
+      }
+
+      if ((drupal_strtolower($label) == 'published') || (drupal_strtolower($label) == 'node_created')) {
+        $label = 'created';
+        if (intval($value))           // timestamp
+          $value = format_date(intval($value), 'custom', DATE_RFC822);
+        elseif (getdate($value))      // string date
+          $value = format_date(strtotime($value), 'custom', DATE_RFC822);
+      }
+      $xml .= $label .'="'. preg_replace('/[^A-Za-z0-9 :\/\-_\.\?\=]/', '', $value) .'" ';
+
+      // $xml .= $label .'="'. $value .'" ';
+    }
+    if ($url) $xml .= ' '.'url="'. $url .'" ';
+    $xml .=  ' />'."\n";
+  }
+  $xml .= '</body>'."\n";
+  $xml .= '</opml>'."\n";
+  if ($view->override_path) {       // inside live preview
+    print htmlspecialchars($xml);
+  }
+  else {
+    drupal_set_header('Content-Type: text/xml');
+    print $xml;
+    // var_dump($view);
+    module_invoke_all('exit');
+    exit;
+  }
+}
+
+function xml_atom_render($view) {
+  global $base_url;
+
+  $xml .= '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
+  $xml .= '<!-- generator="Drupal Views_Datasource.Module" -->'."\n";
+  $xml .='<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">'."\n";
+  $xml .='  <title>'. $view->name .'</title>'."\n";
+  $xml .='  <link rel="alternate" type="text/html" href="'. $base_url .'"/>'."\n";
+  $xml .='  <link rel ="self" type="application/atom+xml" href="'. $base_url .'/'. $view->display_handler->options['path'] .'"/>'."\n";
+  $xml .='  <id>'. $base_url .'/'. $view->display_handler->options['path'] .'</id>'."\n";       // use path as id
+  $xml .='  <updated>###feed_updated###</updated>'."\n";        // will set later
+  $xml .='  <generator>Views Datasource module</generator>'."\n";
+  $feed_last_updated = 0;
+  foreach ($view->result as $node) {
+    $entry = array();
+    foreach ($node as $field_name => $field_value) {
+      $label = views_xml_strip_illegal_chars($field_name);
+      $value = views_xml_strip_illegal_chars(views_xml_is_date($field_value));
+      if (is_null($value) || ($value === '')) continue;
+//      if (preg_match('/\d/', $value)) {
+//        if (strtotime($value))
+//          $value = date(DATE_ISO8601, strtotime($value));
+//      }
+      $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label));       // strip out Profile: from profile fields
+      if (drupal_strtolower($label) == 'nid') $entry['nid'] = $value;
+      if ((drupal_strtolower($label) == 'updated') || (drupal_strtolower($label) == 'updated date') || (drupal_strtolower($label) == 'node_changed')) {
+        if (intval($value))       // timestamp
+          $entry['updated'] = intval($value) ;
+        elseif (getdate($value)) {      // string date
+          $entry['updated'] = strtotime($value);
+        }
+      }
+      if ((drupal_strtolower($label) == 'title') || (drupal_strtolower($label) == 'node_title'))
+        $entry['title'] = $value;
+      if (drupal_strtolower($label) == 'link') $entry['link'] = $value;
+      if ((drupal_strtolower($label) == 'published') || (drupal_strtolower($label) == 'node_created')) {
+        if (intval($value))       // timestamp
+          $entry['published'] =  intval($value) ;
+        elseif (getdate($value)) {      // string date
+          $entry['published'] = strtotime($value);
+        }
+      }
+      if ((drupal_strtolower($label) == 'author') || (drupal_strtolower($label) == 'users_name')) $entry['author'] = $value;
+      if ((drupal_strtolower($label) == 'email') || (drupal_strtolower($label) == 'users_mail')) $entry['email'] = $value;
+      if ((drupal_strtolower($label) == 'content') || (drupal_strtolower($label) == 'node_revisions_body')) $entry['content'] = $value;
+      if ((drupal_strtolower($label) == 'summary') || (drupal_strtolower($label) == 'node_teaser') || (drupal_strtolower($label) == 'node_revisions_teaser')) $entry['summary'] = $value;
+    }
+    if (isset($entry['nid']) && (isset($entry['updated'])) && (isset($entry['link'])) && (isset($entry['title'])) && (isset($entry['published']))) {
+      if (parse_url($entry['link']))
+        $link = $entry['link'];
+      else {
+        print '<b style="color:red">The link URL is not valid.</b>';
+        return;
+      }
+    }
+    elseif (isset($entry['nid']) && (isset($entry['updated'])) && (isset($entry['title'])) && (isset($entry['published']))) {       // make the entry path with base_url + nid {
+      $entry['link'] = $base_url .'/index.php?q=node/'. $entry['nid'];
+    }
+    else {
+      print '<b style="color:red">The fields "nid", "title", "post date", and "updated date" must exist.';
+      return;
+    }
+    $link = $entry['link'];
+    $link_url = parse_url($link);
+    $nid = $entry['nid'];
+    $updated = $entry['updated'];
+    if ($updated > $feed_last_updated) $feed_last_updated = $updated;         // Overall feed updated is the most recent node updated timestamp
+    $title = $entry['title'];
+    $published = $entry['published'];
+    $author = $entry['author'];
+    $mail = $entry['email'];
+    $content = $entry['content'];
+    $summary = $entry['summary'];
+
+    // Create an id for the entry using tag URIs
+    $id = 'tag:'. $link_url['host'] .','. format_date($updated, 'custom', 'Y-m-d') .':'. $link_url['path'] .'?'. $link_url['query'];
+    $xml .= '  <entry>'."\n";
+    $xml .= '    <id>'. $id .'</id>'."\n";
+    $xml .= '    <updated>'. format_date($updated, 'custom', DATE_ATOM) .'</updated>'."\n";
+    $xml .= '    <title type="text">'. $title .'</title>'."\n";
+    $xml .= '    <link rel="alternate" type="text/html" href="'. $link .'"/>'."\n";
+    $xml .= '    <published>'. format_date($published, 'custom', DATE_ATOM) .'</published>'."\n";
+    if ($author) {
+      if ($mail) {
+        $xml .= '    <author><name>'. $author .'</name><email>'. $mail .'</email></author>'."\n";
+      }
+      else $xml .= '    <author><name>'. $author .'</name></author>'."\n";
+    }
+    if ($content) $xml .= '    <content type="html" xml:base="'. $base_url .'"><![CDATA['. $content .']]></content>'."\n";
+    if ($summary) $xml .= '    <summary type="html" xml:base="'. $base_url .'"><![CDATA['. $summary .']]></summary>'."\n";
+    $xml .= '  </entry>'."\n";
+  }
+  $xml .='</feed>'."\n";
+  $xml = str_replace('###feed_updated###', format_date($feed_last_updated, 'custom', DATE_ATOM), $xml);
+  if ($view->override_path) {       // inside live preview
+    print htmlspecialchars($xml);
+  }
+  else {
+    drupal_set_header('Content-Type: application/atom+xml');
+    print $xml;
+    // var_dump($label);
+    module_invoke_all('exit');
+    exit;
+  }
+}
+
+function views_xml_debug_stop($var) {
+	var_dump($var);
+	module_Invoke_all('exit');
+	exit;
 }
