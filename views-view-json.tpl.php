@@ -17,11 +17,11 @@
 
 $options['displaying_output'] = $view->override_path;
 
-json_render($view->result, $options);
+views_json_render($view->result, $options);
 
 
 /**
- * Render JSON.
+ * Render a view's output as JSON.
  *
  * The function will directly output a JSON string instead of returning it.
  *
@@ -30,15 +30,41 @@ json_render($view->result, $options);
  * @param $options
  *   Render options.
  */
-function json_render($items, $options) {
+function views_json_render($items, $options) {
+//  define('EXHIBIT_DATE_FORMAT', '%Y-%m-%d %H:%M:%S');
+
   $obj = new stdClass();
 
-  // do some preprocessing if necessary
+  // Do some preprocessing if necessary.
+
+/* *
+  // TO-DO:  Future stuff like date handling should go here.
+
+  // trim(views_json_is_date($v))
+  //      if (preg_match('/\d/', $var)) {
+  //        if (strtotime($var)) {
+  //          $var = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
+  //        }
+  //      }
+
+  // If input is a serialized date array, return a date string
+  $num_items = count($items);
+  for ($i = 0; $i < $num_items; ++$i) {
+    if (!isset($items[$i]->type)) {
+      if (is_string($input) && strpos($input, 'a:3:{s:5:"month"') === 0) {
+        // serialized date array
+        $date = unserialize($input);
+        return format_date(mktime(0, 0, 0, $date['month'], $date['day'], $date['year']), 'custom', DATE_ISO8601);
+      }
+      return $input;
+    }
+  }
+/* */
 
   if ($options['format'] === 'exhibit') {
-    // we'll be rendering MIT Simile/Exhibit JSON
+    // We'll be rendering MIT Simile/Exhibit JSON.
 
-    // add required fields
+    // Add required fields.
     $num_items = count($items);
     for ($i = 0; $i < $num_items; ++$i) {
       if (!isset($items[$i]->type)) {
@@ -52,31 +78,26 @@ function json_render($items, $options) {
     $obj->items = $items;
   }
   else {
-    // we'll be rendering regular JSON
+    // We'll be rendering regular JSON.
     $obj->nodes = $items;
   }
 
-  // render the output
+  // Render the output.
   if ($options['displaying_output']) {
-    // we're inside a live preview where the JSON is pretty-printed
-    print '<code>'. _json_preview_render($obj) .'</code>';
+    // We're inside a live preview where the JSON is pretty-printed.
+    print '<code>'. json_encode_formatted($obj) .'</code>';
   }
   else {
-    if (function_exists('json_encode')) {
-      $json = json_encode($obj);
-    }
-    else {
-      $json = _json_render($obj);
-    }
+    $json = json_encode($obj);
 
-    if ($options['using_coder']) {
-      // we're in "coder" mode
+    if ($options['using_views_api_mode']) {
+      // We're in Views API mode.
       print $json;
     }
     else {
-      // we want to send the JSON as a server response so switch the content type
-      // and stop further processing of the page.
-      drupal_set_header('Content-Type: application/json');
+      // We want to send the JSON as a server response so switch the content
+      // type and stop further processing of the page.
+      drupal_set_header('Content-Type: application/json; charset=utf-8');
       print $json;
       module_invoke_all('exit');
       exit;
@@ -86,105 +107,55 @@ function json_render($items, $options) {
 
 
 /**
- * Helper function that builds the JSON.
+ * Encodes JSON in a pretty-printed fashion.
  */
-function _json_render($var) {
-//  define('EXHIBIT_DATE_FORMAT', '%Y-%m-%d %H:%M:%S');
-
-  // hack of the elegant drupal_to_js() function
-  switch (gettype($var)) {
-    case 'boolean':
-      // lowercase is necessary!
-      return $var ? 'true' : 'false';
-    case 'integer':
-    case 'double':
-      return $var;
-    case 'resource':
-    case 'string':
-//      if (preg_match('/\d/', $var)) {
-//        if (strtotime($var)) {
-//          $var = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
-//        }
-//      }
-
-      $value = views_json_encode_special_chars(trim(views_json_is_date($var)));
-//      $value = str_replace(array("\r", "\n", "<", ">", "&"),
-//                           array('\r', '\n', '\x3c', '\x3e', '\x26'),
-//                           addslashes($value));
-      return '"'. $value .'"';
-    case 'array':
-      // Arrays in JSON can't be associative.  If the array is empty or if it
-      // has sequential whole number keys starting with 0, it's not associative
-      // so we can go ahead and convert it as an array.
-      if (empty($var) || array_keys($var) === range(0, sizeof($var) - 1)) {
-        $output = array();
-        foreach ($var as $v) {
-          $output[] = _json_render($v);
-        }
-        return '['. implode(',', $output) .']';
-      }
-      // Otherwise, fall through to convert the array as an object.
-    case 'object':
-      $output = array();
-      foreach ($var as $k => $v) {
-        $output[] = trim(views_json_check_label(_json_render(strval($k)))) .':'. _json_render($v);
-      }
-      return '{'. implode(',', $output) .'}';
-    default:
-      return 'null';
-  }
-}
-
-
-/**
- * Helper function that builds pretty-printed JSON.
- */
-function _json_preview_render($var, $depth = 0) {
-//  define('EXHIBIT_DATE_FORMAT', '%Y-%m-%d %H:%M:%S');
-
+function json_encode_formatted($v, $depth = 0) {
   $base_indent  = '&nbsp;&nbsp;';
   $eol          = '<br />';
   $indent       = str_repeat($base_indent, $depth);
 
-  // hack of the elegant drupal_to_js() function
-  switch (gettype($var)) {
+  // This is based on the drupal_to_js() function.
+  switch (gettype($v)) {
     case 'boolean':
-      // lowercase is necessary!
-      return $var ? 'true' : 'false';
+      // Lowercase is necessary!
+      return $v ? 'true' : 'false';
+
     case 'integer':
     case 'double':
-      return $var;
+      return $v;
+
     case 'resource':
     case 'string':
-//      if (preg_match('/\d/', $var)) {
-//        if (strtotime($var)) {
-//          $var = gmstrftime(EXHIBIT_DATE_FORMAT, strtotime($value));
-//        }
-//      }
+      $search   = array('"', chr(92), chr(47), chr(8), chr(12), chr(13) . chr(10), chr(10), chr(13), chr(9));
+      $replace  = array('\"', '\\', '\/', '\b', '\f', '\n', '\n', '\r', '\t');
+      $output   = str_replace($search, $replace, $v);
+/* *
+      $output = str_replace(array("\r", "\n", "<", ">", "&"),
+                           array('\r', '\n', '\x3c', '\x3e', '\x26'),
+                           addslashes($output));
+/* */
+      return '"'. check_plain($output) .'"';
 
-      $value = views_json_encode_special_chars(trim(views_json_is_date($var)));
-//      $value = str_replace(array("\r", "\n", "<", ">", "&"),
-//                           array('\r', '\n', '\x3c', '\x3e', '\x26'),
-//                           addslashes($value));
-      return '"'. check_plain($value) .'"';
     case 'array':
       // Arrays in JSON can't be associative.  If the array is empty or if it
       // has sequential whole number keys starting with 0, it's not associative
       // so we can go ahead and convert it as an array.
-      if (empty($var) || array_keys($var) === range(0, sizeof($var) - 1)) {
+      if (empty($v) || array_keys($v) === range(0, sizeof($v) - 1)) {
         $output = array();
-        foreach ($var as $v) {
-          $output[] = $indent . $base_indent . _json_preview_render($v, $depth + 1);
+        foreach ($v as $val) {
+          $output[] = $indent . $base_indent . json_encode_formatted($val, $depth + 1);
         }
         return '['. (!empty($output) ? $eol . implode(','. $eol, $output) . $eol . $indent : '') .']';
       }
       // Otherwise, fall through to convert the array as an object.
+
     case 'object':
       $output = array();
-      foreach ($var as $k => $v) {
-        $output[] = $indent . $base_indent . trim(views_json_check_label(_json_preview_render(strval($k)))) .' : '. _json_preview_render($v, $depth + 1);
+      foreach ($v as $key => $val) {
+        $output[] = $indent . $base_indent . json_encode_formatted(strval($key)) .' : '. json_encode_formatted($val, $depth + 1);
       }
       return '{'. (!empty($output) ? $eol . implode(','. $eol, $output) . $eol . $indent : '') .'}';
+
     default:
       return 'null';
   }

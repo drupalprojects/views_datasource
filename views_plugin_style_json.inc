@@ -34,11 +34,11 @@ class views_plugin_style_json extends views_plugin_style {
       ),
       '#default_value'  => $this->options['format'],
     );
-    $form['using_coder'] = array(
+    $form['using_views_api_mode'] = array(
       '#type'           => 'checkbox',
-      '#title'          => t('Use coder mode'),
-      '#default_value'  => $this->options['using_coder'],
-      '#description'    => t('Not using coder mode means the JSON gets output directly and the server ceases normal page processing.  Using coder mode means the server does not cease processing after outputting the JSON.  This allows for the Views API to be used with the view without having to prematurely terminate page processing.'),
+      '#title'          => t('Views API mode'),
+      '#default_value'  => $this->options['using_views_api_mode'],
+      '#description'    => t('Not using View API mode means the JSON gets output directly and the server ceases normal page processing.  Using it means the server does not cease processing after outputting the JSON.  This allows the Views API to be used with the view without having to prematurely terminate page processing.'),
     );
   }
 }

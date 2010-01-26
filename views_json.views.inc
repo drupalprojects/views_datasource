@@ -16,7 +16,7 @@
 function views_json_views_plugins() {
   return array(
     'module'  => 'views_json',
-    'style'   => array(                 // declare the views_json style plugin
+    'style'   => array(                 // Declare the views_json style plugin.
       'views_json' => array(
         'title'           => t('JSON data document'),
         'theme'           => 'views_view_json',

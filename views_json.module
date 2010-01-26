@@ -11,14 +11,14 @@
 
 function views_json_views_api() {
   return array(
-    'api' => 2,
+    'api' => '2.0',
 //    'path' => drupal_get_path('module', 'views_json'),
   );
 }
 
 
 /**
- * Strips illegal JSON characters in identifier string.
+ * Strips illegal characters for an identifier from a JSON string.
  *
  * @param $input
  *   Identifier string to process.
@@ -38,40 +38,6 @@ function views_json_check_label($input) {
 
 
 /**
- * Encodes special JSON characters in string
- *
- * @param $input
- *   String to process.
- * @return
- *   String with special JSON characters encoded.
- */
-function views_json_encode_special_chars($input) {
-  $search   = array(chr(92), chr(47), '"', chr(8), chr(12), chr(13) . chr(10), chr(10), chr(13), chr(9));
-  $replace  = array('\\', '\/', '\"', '\b', '\f', '\n', '\n', '\r', '\t');
-  return str_replace($search, $replace, $input);
-}
-
-
-/**
- * If input is a serialized date array, return a date string
- *
- * @param $input
- *   Input to check.
- * @return
- *   Either the original input or a date string.
- */
-function views_json_is_date($input) {
-  if (is_string($input) && strpos($input, 'a:3:{s:5:"month"') === 0) {
-    // serialized date array
-    $date = unserialize($input);
-    return format_date(mktime(0, 0, 0, $date['month'], $date['day'], $date['year']), 'custom', DATE_ISO8601);
-  }
-
-  return $input;
-}
-
-
-/**
  * Gets JSON data from a View rendered in the JSON data document style.
  *
  * This is useful for when working with a JSON view in code.
@@ -83,7 +49,8 @@ function views_json_is_date($input) {
  * @param $args
  *   The arguments to pass to the view.
  * @param $raw
- *   If TRUE, the JSON data is returned as a string.  Otherwise, an object representation is returned.
+ *   If TRUE, the JSON data is returned as a string.  Otherwise, an object
+ *   representation is returned.
  * @return
  *   The JSON data in the form of an object or a string or NULL otherwise.
  */
