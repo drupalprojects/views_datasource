@@ -6,8 +6,8 @@
  * View template to render view fields as XML.
  *
  * - $view: The view in use.
- * - $rows: The raw result objects from the query, with all data it fetched.
- * - $attachment
+ * - $rows: Array of row objects as rendered by _views_json_render_fields 
+ * - $attachment: not used currently
  * - $options: The options for the style passed in from the UI.
  *
  * @ingroup views_templates

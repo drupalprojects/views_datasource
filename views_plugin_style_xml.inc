@@ -12,8 +12,9 @@
  */
 class views_plugin_style_xml extends views_plugin_style {
 
-  /** Implementation of views_plugin_style::option_definition 
-    */ 
+  /** 
+   * Implementation of views_plugin_style::option_definition 
+   */ 
 	function option_definition() {
     $options = parent::option_definition();
     $options['schema'] = array('default' => 'raw', 'translatable' => TRUE);
@@ -79,30 +80,13 @@ class views_plugin_style_xml extends views_plugin_style {
   	$view = &$this->view;
   	$options = $this->options;
   	$field = $view->field;
-  	//views_xml_debug_stop($view->result);
-  	//views_xml_debug_stop($field["body"]->options["label"]);
-  	//view_xml_debug($field["body"]-)
-  	/*
- 	  if (empty($this->row_plugin)) {
- 	    vpr('views_plugin_style_xml_test: Views XML: The row plugin for this style must be the XML element plugin.');
- 	    drupal_set_message('<b style="color:red">Views XML: The row plugin for this style must be the XML element plugin.</b>');
- 	    return;
- 	  }
- 	
- 	  if (get_class($this->row_plugin) !== 'views_plugin_row_xml_test') {
- 		  vpr('views_plugin_style_xml_test: The row plugin for this style must be the XML element plugin.');
- 		  drupal_set_message('<b style="color:red">Views XML: The row plugin for this style must be the XML element plugin.</b>');
- 		  return;
- 	  }
- 	  */
 
  	  $rows = array();
  	 
     foreach ($view->result as $row) {
-    //views_xml_debug_stop($row);
       $rows[] = _views_xml_render_fields($view, $row);
     }
-    //views_xml_debug_stop($rows);
+    
  	  return theme($this->theme_functions(), $this->view, $rows, $this->attachment, $this->options); 	  
  	}
  
