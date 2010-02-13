@@ -9,31 +9,34 @@
  *
  * @ingroup views_templates
  */
-  //views_xml_test_debug_stop($view->base_table);
   $base = $view->base_table;
   $root = $options['root_element'];
-  print "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"; 
+  $plaintext_output = $options["plaintext_output"];
+  $content_type = ($options['content_type'] == 'default') ? 'text/xml' : $options['content_type'];
+  $header = $options['header'];
+  $xml =  "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+  if ($header) $xml.= $header."\n"; 
 	$xml .= "<$root>\n";
   foreach($rows as $row) {
 		$xml .= ($options['element_output'] == 'nested') ? "  <$base>\n": "  <$base\n";
 	  foreach($row as $id => $object) {
 		  if ($options['field_output'] == 'normal')  {
 		    $label = _views_xml_strip_illegal_xml_name_chars(check_plain(strip_tags($object->label)));
-		    $content = $object->content;
+		    $content = ($plaintext_output ? check_plain(strip_tags($object->content)) : $object->content);
 		  }
 		  elseif ($options['field_output'] == 'raw') {
 		    $label = _views_xml_strip_illegal_xml_name_chars(check_plain(strip_tags($id)));
-		    $content = $object->raw;
+		    $content = ($plaintext_output ? check_plain(strip_tags($object->raw)) : $object->raw);
 		  }
 		  if ($options['element_output'] == 'nested') {
 			  //$xml .= ">\n";
 			  $xml .= "    <$label>\n";
-			  $xml .= "    ".($options['escape_as_CDATA'] == 'yes') ? "      <![CDATA[$content]]>\n": "      ".$content."\n";
+			  $xml .= "    ".(($options['escape_as_CDATA'] == 'yes') ? "      <![CDATA[$content]]>\n": "      ".$content."\n");
 			  $xml .= "    </$label>\n";
 		  }
 		  elseif($options['element_output'] == 'attributes') {
-		    $content = _views_xml_strip_illegal_xml_name_chars(check_plain(strip_tags($content)));
-			  $xml .= " $label='$content' ";
+        $content = _views_xml_strip_illegal_xml_attribute_value_chars($content);
+		    $xml .= " $label=\"$content\" ";
 		  }
 	  }
 	  $xml .= ($options['element_output'] == 'nested') ? "  </$base>\n": "/>\n";
@@ -43,8 +46,7 @@
     print htmlspecialchars($xml);
   }
   else {
-    drupal_set_header('Content-Type: text/xml');
+    drupal_set_header("Content-Type: $content_type");
     print $xml;
-    module_invoke_all('exit');
     exit;
   }
