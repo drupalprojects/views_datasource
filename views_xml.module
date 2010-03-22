@@ -40,12 +40,12 @@ function views_xml_theme() {
        'file' => 'views_views_xml_style.theme.inc',
        'template' => 'views-views-xml-style-opml',       
      ),
-     /**
-     'views_view_xml_test_atom_style' => array(
-       'template' => 'views_view_xml_test_atom_style',
+     'views_views_xml_style_atom' => array(
+       'arguments' => array('view' => NULL, 'rows' => array(), 'attachment' => NULL, 'options' => array()),  
        'path' => $path,
-       'arguments' => array('view' => NULL, 'row' => array(), 'attachment' => NULL, 'options' => array()),
-     ),*/
+       'file' => 'views_views_xml_style.theme.inc',
+       'template' => 'views-views-xml-style-atom',       
+     ),
    );
 }  
 
@@ -116,6 +116,44 @@ function _views_xml_strip_illegal_xml_name_chars($input) {
   return $output;
 }
 
+/**
+ * Creates an author object to use in the headers of OPML and Atom documents
+ * @param $username
+ * @return unknown_type
+ */
+function _views_xml_format_author($username) {
+	$author = array();
+	if (!$username) {
+		$author["name"] = variable_get('anonymous', t('Anonymous'));
+		$author["email"] = variable_get('site_mail', 'none@none.info');
+		return $author;
+	}
+	if (is_numeric($username)) {
+		$user = user_load(array('uid'=>$username));
+	}
+	else $user = user_load(array('name'=>$username));
+	if (!$user) {
+		//$author["name"] = variable_get('anonymous', t('Anonymous'));
+		$author["name"] = variable_get('anonymous', t('Anonymous'));
+		$author["email"] = variable_get('site_mail', 'none@none.info');
+		return $author;
+	}
+	if (!module_exists("profile")) {
+		$author["name"] = $username;
+		$author["email"] = check_plain($user->mail);
+		return $author;
+	}
+	else {
+	  profile_load_profile($user);
+	  $author["name"] = check_plain(($user->profile_name ? $user->profile_name : $username));
+	  $author["email"] = check_plain($user->mail);
+    if (user_access('access user profiles')) {
+      $author['uri'] = url('user/' . $user->uid, array('absolute' => TRUE));
+    } 	
+	  return $author;
+	}
+}
+   
 
 /**
  * If input is a serialized date array, return a date string

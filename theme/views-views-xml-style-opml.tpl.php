@@ -1,5 +1,5 @@
 <?php
-// $Id $
+// $Id$
 /**
  * @file views-views-xml-style-opml.tpl.php
  * Default template for the Views XML style plugin using the OPML schema
@@ -12,7 +12,7 @@
  */
   //_views_xml_debug_stop($outlines);
   $xml =  "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-  $xml .= '<!-- generator="Drupal Views_Datasource.Module" -->'."\n";
+  $xml .= '<!-- generator="Drupal Views Datasource.Module" -->'."\n";
   $xml .= "<opml version =\"2.0\">\n"; 
   if (!$header) { //build our own header
     $xml .= "  <head>\n";

@@ -16,6 +16,7 @@ class views_plugin_style_xml extends views_plugin_style {
    * Implementation of views_plugin_style::option_definition 
    */ 
 	function option_definition() {
+		global $user;
     $options = parent::option_definition();
     $options['schema'] = array('default' => 'raw', 'translatable' => TRUE);
     $options['root_element'] = array('default' => 'node', 'translatable' => TRUE);
@@ -26,7 +27,9 @@ class views_plugin_style_xml extends views_plugin_style {
     $options['escape_as_CDATA'] = array('default' => 'yes', 'translatable' => TRUE);
     $options['content_type'] = array('default' => 'text/xml', 'translatable' => FALSE);
     $options['header'] = array('default' => NULL, 'translatable' => FALSE);
+    $options['author'] = array('default' => $user->name, 'translatable' => FALSE);
     $options['using_views_api_mode'] = array('default' => FALSE, 'translatable' => TRUE);
+    //$options['action_on_missing_field'] = array('default' => 'none', 'translatable' => TRUE);
     return $options;
   }
   
@@ -104,13 +107,28 @@ class views_plugin_style_xml extends views_plugin_style {
          ),
       '#default_value'  => $this->options['content_type'],
       '#description'    => t('The Content-Type header that will be sent with the JSON output.')
-    ); 
+    );
+    $form['author'] = array (
+      '#type' => 'textfield',
+      '#title' => 'View author',
+      '#description' => 'The Drupal user name of the person who authored this view.',
+      '#default_value' => $this->options['author'], 
+      );     
     $form['using_views_api_mode'] = array(
       '#type'           => 'checkbox',
       '#title'          => t('Views API mode'),
       '#default_value'  => $this->options['using_views_api_mode'],
       '#description'    => t('Not using View API mode means the JSON gets output directly and the server ceases normal page processing.  Using it means the server does not cease processing after outputting the JSON.  This allows the Views API to be used with the view without having to prematurely terminate page processing.'),
-    );      
+    );
+    /*
+    $form['action_on_missing_field'] = array(
+      '#type'           => 'radios',
+      '#title'          => t('Action on missing field'),
+      '#options' => array('none' => t('Take no action if a required field is missing.'), 'warn' => t('Warn about the missing fields in preview mode.'), 'stop'=>t('Stop page processing and send an error message if a required field is missing.')),
+      '#default_value'  => $this->options['action_on_missing_field'],
+      '#description'    => t('Action to take if no field can be mapped to a required element or schema for the selected XML schema.'),
+    );*/      
+    
   } 
  	
   /**
