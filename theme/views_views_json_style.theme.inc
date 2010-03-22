@@ -33,12 +33,14 @@ function template_preprocess_views_views_json_style_simple(&$vars) {
   	/*Convert the $rows into a hierachial key=>value array*/
   	foreach ($row as $field) {
   	  if ($options["field_output"] == "normal") {
-  	  	$label = $plaintext_output ? check_plain(strip_tags($field->label)) : $field->label;
-  	  	$content = $plaintext_output ? check_plain(strip_tags($field->content)) : $field->content;
+  	  	if ($field->label)
+  	  	  $label = $plaintext_output ? strip_tags($field->label) : $field->label;
+  	  	else $label = $plaintext_output ? strip_tags($field->id) : $field->id;  
+  	  	$content = $plaintext_output ? strip_tags($field->content) : $field->content;
   	  }
   	  elseif ($options["field_output"] == "raw") {
-  	  	$label = $plaintext_output ? check_plain(strip_tags($field->id)) : $field->id;
-  	  	$content = $plaintext_output ? check_plain(strip_tags($field->raw)) : $field->raw;
+  	  	$label = $plaintext_output ? strip_tags($field->id) : $field->id;
+  	  	$content = $plaintext_output ? strip_tags($field->raw) : $field->raw;
   	  }	
   	$object[$base][$label] = $content;
   	}
@@ -61,12 +63,14 @@ function template_preprocess_views_views_json_style_exhibit(&$vars) {
   	/*Convert the $rows into a hierachial key=>value array*/
   	foreach ($row as $field) {
   	  if ($options["field_output"] == "normal") {
-  	  	$label = $plaintext_output ? check_plain(strip_tags($field->label)) : $field->label;
-  	  	$content = $plaintext_output ? check_plain(strip_tags($field->content)) : $field->content;
+  	  	if ($field->label)
+  	  	  $label = $plaintext_output ? check_plain(strip_tags($field->label)) : $field->label;
+  	  	else $label = $plaintext_output ?  check_plain(strip_tags($field->id)) : $field->id;
+  	  	$content = $plaintext_output ?  check_plain(strip_tags($field->content)) : $field->content;
   	  }
   	  elseif ($options["field_output"] == "raw") {
-  	  	$label = $plaintext_output ? check_plain(strip_tags($field->id)) : $field->id;
-  	  	$content = $plaintext_output ? check_plain(strip_tags($field->raw)) : $field->raw;
+  	  	$label = $plaintext_output ?  check_plain(strip_tags($field->id)) : $field->id;
+  	  	$content = $plaintext_output ?  check_plain(strip_tags($field->raw)) : $field->raw;
   	  }
   	  $object[$label] = $content;	
   	}

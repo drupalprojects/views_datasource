@@ -156,7 +156,7 @@ function _views_json_encode_formatted($v, $depth = 0) {
                            array('\r', '\n', '\x3c', '\x3e', '\x26'),
                            addslashes($output));
 /* */
-      return '"'. check_plain($output) .'"';
+      return '"'. check_plain($output).'"';
 
     case 'array':
       // Arrays in JSON can't be associative.  If the array is empty or if it
