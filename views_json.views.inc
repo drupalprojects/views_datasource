@@ -30,7 +30,8 @@ function views_json_views_plugins() {
           'uses fields'     => TRUE,
           'uses options'    => TRUE,
           'type'            => 'normal',
-	        'help_topic'      => 'style-json'
+	        'help_topic'      => 'style-json',
+	        'even empty'      => TRUE
       ),
     ),
   );
