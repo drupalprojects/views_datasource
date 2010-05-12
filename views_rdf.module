@@ -11,8 +11,122 @@
 
 function views_rdf_views_api() {
   return array(
-    'api' => 2,
+    'api' => '2.0',
+    'path' => drupal_get_path('module', 'views_rdf'),
   );
+}
+
+function views_rdf_theme() {
+   $path = drupal_get_path('module', 'views_rdf') .'/theme';
+   return array(
+     'views_views_rdf_style' => array(
+       'arguments' => array('view' => NULL, 'rows' => array(), 'attachment'=>NULL, 'options' => array()),
+       'path' => $path,
+       'file' => 'views_views_rdf_style.theme.inc',
+     ),
+     'views_views_rdf_style_foaf' => array(
+       'arguments' => array('view' => NULL, 'rows' => array(), 'attachment' => NULL, 'options'=>array()),  
+       'path' => $path,
+       'file' => 'views_views_rdf_style.theme.inc',
+       'template' => 'views-views-rdf-style-foaf'            
+     ),   
+     'views_views_rdf_style_sioc' => array(
+       'arguments' => array('view' => NULL, 'rows' => array(), 'attachment' => NULL, 'options' => array()),  
+       'path' => $path,
+       'file' => 'views_views_rdf_style.theme.inc',
+       'template' => 'views-views-rdf-style-sioc',       
+     ),
+   );
+}
+
+/**
+ * Takes each field from a row object and renders the field as determined by the field's theme 
+ * 
+ * @param $view
+ * 	 View the row belongs to 
+ * @param $row
+ *   Row object
+ * @return array
+ *   Object containing all the raw and rendered fields  
+ */
+
+function _views_rdf_render_fields(&$view, $row) {
+  $rendered_fields = array();
+  $field_ids = array_keys($view->field);
+  
+  foreach ($field_ids as $id) {
+    $field = &$view->field[$id];
+    //$field_output = $field->theme($row);
+    $field_output = $view->field[$field->options['id']]->advanced_render($row);
+    if (empty($field->options['exclude'])) {
+      $object = new stdClass();
+      $object->id = $id;
+      $object->content = $field_output;
+      if (isset($view->field[$id]->field_alias) && isset($row->{$view->field[$id]->field_alias})) {
+        $object->raw = $row->{$view->field[$id]->field_alias};
+      }
+      else {
+        $object->raw = NULL; // make sure it exists to reduce NOTICE
+      }
+      $object->class = views_css_safe($id);
+      $object->label = check_plain($view->field[$id]->label());
+      $rendered_fields[$id] = $object;
+    }
+  }
+  return $rendered_fields;
+}
+
+/**
+ * Replaces illegal characters in a XML attribute value string with their encoded entities as well as the " char.
+ *
+ * @param $input
+ *   String to process.
+ * @return
+ *   String with illegal characters stripped away and entities encoded.
+ */
+function _views_rdf_strip_illegal_xml_attribute_value_chars($input) {
+  $output = str_replace('<', '&lt;', $input);        // encode left-angled bracket
+  $output = str_replace('>', '&gt;', $output);        // encode right-angled bracket
+  $output = str_replace('"', '&quot;', $output);      // encode quote
+  return $output;
+}
+
+/**
+ * Strips characters not matching the XML Name production: 
+ *
+ * @param $input
+ *   String to process.
+ * @return
+ *   String with illegal characters stripped.
+ */
+
+function _views_rdf_strip_illegal_xml_name_chars($input) {
+  $output = preg_replace("/(^xml)|([^A-Za-z0-9_\-\.:])/", "", $input);
+  return $output;
+}
+
+/**
+ * Creates an author object to use in the headers of OPML and Atom documents
+ * @param $username
+ * @return unknown_type
+ */
+function _views_rdf_format_author($username) {
+	$author = array();
+	if (!$username) {
+		$author["name"] = variable_get('anonymous', t('Anonymous'));
+		$author["email"] = variable_get('site_mail', 'none@none.info');
+		return $author;
+	}
+	if (is_numeric($username)) {
+		$user = user_load(array('uid'=>$username));
+	}
+	else $user = user_load(array('name'=>$username));
+	if (!$user) {
+		//$author["name"] = variable_get('anonymous', t('Anonymous'));
+		$author["name"] = variable_get('anonymous', t('Anonymous'));
+		$author["email"] = variable_get('site_mail', 'none@none.info');
+		return $author;
+	}
 }
 
 
@@ -53,4 +167,10 @@ function views_rdf_is_date($input) {
     $date = unserialize($input);
     return format_date(mktime(0, 0, 0, $date['month'], $date['day'], $date['year']), 'custom', DATE_ISO8601);
   }
+}
+
+function _views_rdf_debug_stop($var) {
+	var_dump($var);
+	module_Invoke_all('exit');
+	exit;
 }

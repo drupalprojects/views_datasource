@@ -4,3 +4,4 @@ description = "Views style plugin to render node content as RDF."
 package = Views
 core = 6.x
 dependencies[] = views
+php = 5.1
