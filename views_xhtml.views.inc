@@ -5,7 +5,7 @@
  * @file
  * Views style plugin to render nodes as XHTML microformats.
  *
- * @see views-view-xhtml.tpl.php
+ * @see views_plugin_style_xhtml.inc
  * @ingroup views_plugins
  */
 
@@ -14,15 +14,19 @@
  * Implementation of hook_views_plugin().
  */
 function views_xhtml_views_plugins() {
+	$path = drupal_get_path('module', 'views_xhtml');
   return array(
     'module'  => views_xhtml,
     'style'   => array(                 // declare the views_xhtml style plugin
       'views_xhtml' => array(
         'title'           => t('XHTML data document'),
-        'theme'           => 'views_view_xhtml',
+        'path'            => $path,
         'help'            => t('Displays nodes as XHTML microformats.'),
         'handler'         => 'views_plugin_style_xhtml',
-        'uses row plugin' => TRUE,
+        'theme'           => 'views_views_xhtml_style',
+	      'theme file'      => 'views_views_xhtml_style.theme.inc',
+	      'theme path'      => $path.'/theme', 
+        'uses row plugin' => FALSE,
         'uses fields'     => TRUE,
         'uses options'    => TRUE,
         'type'            => 'normal',
@@ -31,15 +35,3 @@ function views_xhtml_views_plugins() {
   );
 }
 
-
-/**
- * Theme preprocess function for views-view-xhtml.tpl.php
- *
- * @param $vars
- *   Template variables.
- */
-function template_preprocess_views_view_xhtml(&$vars) {
-  $view     = &$vars['view'];
-  $options  = $view->style_handler->options;
-  $handler  = $view->style_handler;
-}

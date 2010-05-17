@@ -11,8 +11,169 @@
 
 function views_xhtml_views_api() {
   return array(
-    'api' => 2,
+    'api' => '2.0',
+    'path' => drupal_get_path('module', 'views_xhtml')
   );
+}
+
+/** 
+ * Implementation of hook_theme().
+ */
+
+function views_xhtml_theme() {
+   $path = drupal_get_path('module', 'views_xhtml') .'/theme';
+   return array(
+     'views_views_xhtml_style' => array(
+       'arguments' => array('view' => NULL, 'rows' => array(), 'attachment'=>NULL, 'options' => array()),
+       'path' => $path,
+       'file' => 'views_views_xhtml_style.theme.inc',
+     ),
+     'views_views_xhtml_style_hcard' => array(
+       'arguments' => array('view' => NULL, 'rows' => array(), 'attachment' => NULL, 'options'=>array()),  
+       'path' => $path,
+       'file' => 'views_views_xhtml_style.theme.inc',
+       'template' => 'views-views-xhtml-style-hcard'
+            
+     ),   
+     'views_views_xhtml_style_hcalendar' => array(
+       'arguments' => array('view' => NULL, 'rows' => array(), 'attachment' => NULL, 'options' => array()),  
+       'path' => $path,
+       'file' => 'views_views_xhtml_style.theme.inc',
+       'template' => 'views-views-xhtml-style-hcalendar',       
+     ),
+   );
+}  
+
+/**
+ * Takes each field from a row object and renders the field as determined by the field's theme 
+ * 
+ * @param $view
+ * 	 View the row belongs to 
+ * @param $row
+ *   Row object
+ * @return array
+ *   Object containing all the raw and rendered fields  
+ */
+
+function _views_xhtml_render_fields(&$view, $row) {
+  $rendered_fields = array();
+  $field_ids = array_keys($view->field);
+  
+  foreach ($field_ids as $id) {
+    $field = &$view->field[$id];
+    //$field_output = $field->theme($row);
+    $field_output = $view->field[$field->options['id']]->advanced_render($row);
+    if (empty($field->options['exclude'])) {
+      $object = new stdClass();
+      $object->id = $id;
+      $object->content = $field_output;
+      if (isset($view->field[$id]->field_alias) && isset($row->{$view->field[$id]->field_alias})) {
+        $object->raw = $row->{$view->field[$id]->field_alias};
+      }
+      else {
+        $object->raw = NULL; // make sure it exists to reduce NOTICE
+      }
+      $object->class = views_css_safe($id);
+      $object->label = check_plain($view->field[$id]->label());
+      $rendered_fields[$id] = $object;
+    }
+  }
+  return $rendered_fields;
+}
+
+/**
+ * Replaces illegal characters in a attribute value string with their encoded entities as well as the " char.
+ *
+ * @param $input
+ *   String to process.
+ * @return
+ *   String with illegal characters stripped away and entities encoded.
+ */
+function _views_xhtml_strip_illegal_xml_attribute_value_chars($input) {
+  $output = str_replace('<', '&lt;', $input);        // encode left-angled bracket
+  $output = str_replace('>', '&gt;', $output);        // encode right-angled bracket
+  $output = str_replace('"', '&quot;', $output);      // encode quote
+  return $output;
+}
+
+
+/**
+ * Strips characters not matching the xhtml Name production: 
+ *
+ * @param $input
+ *   String to process.
+ * @return
+ *   String with illegal characters stripped.
+ */
+
+function _views_xhtml_strip_illegal_xml_name_chars($input) {
+  $output = preg_replace("/(^xhtml)|([^A-Za-z0-9_\-\.:])/", "", $input);
+  return $output;
+}
+
+/**
+ * Creates an author object to use in the headers of OPML and Atom documents
+ * @param $username
+ * @return unknown_type
+ */
+function _views_xhtml_format_author($username) {
+	$author = array();
+	if (!$username) {
+		$author["name"] = variable_get('anonymous', t('Anonymous'));
+		$author["email"] = variable_get('site_mail', 'none@none.info');
+		return $author;
+	}
+	if (is_numeric($username)) {
+		$user = user_load(array('uid'=>$username));
+	}
+	else $user = user_load(array('name'=>$username));
+	if (!$user) {
+		//$author["name"] = variable_get('anonymous', t('Anonymous'));
+		$author["name"] = variable_get('anonymous', t('Anonymous'));
+		$author["email"] = variable_get('site_mail', 'none@none.info');
+		return $author;
+	}
+	if (!module_exists("profile")) {
+		$author["name"] = $username;
+		$author["email"] = check_plain($user->mail);
+		return $author;
+	}
+	else {
+	  profile_load_profile($user);
+	  $author["name"] = check_plain(($user->profile_name ? $user->profile_name : $username));
+	  $author["email"] = check_plain($user->mail);
+    if (user_access('access user profiles')) {
+      $author['uri'] = url('user/' . $user->uid, array('absolute' => TRUE));
+    } 	
+	  return $author;
+	}
+}
+   
+
+/**
+ * If input is a serialized date array, return a date string
+ *
+ * @param $input
+ *   Input to check.
+ * @return
+ *   Either the original input or a date string.
+ */
+/** may never be used as the properly rendered date strings are available
+function views_xhtml_is_date($input) {
+  if (strpos($input, 'a:3:{s:5:"month"') !== 0) {
+    return $input;
+  }
+  else {        // serialized date array
+    $date = unserialize($input);
+    return format_date(mktime(0, 0, 0, $date['month'], $date['day'], $date['year']), 'custom', DATE_ISO8601);
+  }
+}
+**/
+
+function _views_xhtml_debug_stop($var) {
+	var_dump($var);
+	module_Invoke_all('exit');
+	exit;
 }
 
 
@@ -24,26 +185,26 @@ function views_xhtml_views_api() {
  * @return
  *   String with illegal characters stripped away and entities encoded.
  */
-function views_xhtml_strip_illegal_chars($input) {
-  $output = preg_replace(
-              '/[\x{80}-\x{A0}'.      // Non-printable ISO-8859-1 + NBSP
-              '\x{01}-\x{1F}'.        // Non-printable ASCII characters
-              '\x{AD}'.               // Soft-hyphen
-              '\x{2000}-\x{200F}'.    // Various space characters
-              '\x{2028}-\x{202F}'.    // Bidirectional text overrides
-              '\x{205F}-\x{206F}'.    // Various text hinting characters
-              '\x{FEFF}'.             // Byte order mark
-              '\x{FF01}-\x{FF60}'.    // Full-width latin
-              '\x{FFF9}-\x{FFFD}'.    // Replacement characters
-              '\x{0}]/u',             // NULL byte
-            '', $input);
-  $output = str_replace('"', '&quot;', $output);      // encode quote
-  $output = str_replace('&', '&amp;', $output);       // encode ampersand
-  $output = str_replace("'", '&apos;', $output);      // encode apostrophe
-  $output = str_replace('<', '&lt;', $output);        // encode left-angled bracket
-  $output = str_replace('>', '&rt;', $output);        // encode right-angled bracket
-  return $output;
-}
+//function views_xhtml_strip_illegal_chars($input) {
+//  $output = preg_replace(
+//              '/[\x{80}-\x{A0}'.      // Non-printable ISO-8859-1 + NBSP
+//              '\x{01}-\x{1F}'.        // Non-printable ASCII characters
+//              '\x{AD}'.               // Soft-hyphen
+//              '\x{2000}-\x{200F}'.    // Various space characters
+//              '\x{2028}-\x{202F}'.    // Bidirectional text overrides
+//              '\x{205F}-\x{206F}'.    // Various text hinting characters
+//              '\x{FEFF}'.             // Byte order mark
+//              '\x{FF01}-\x{FF60}'.    // Full-width latin
+//              '\x{FFF9}-\x{FFFD}'.    // Replacement characters
+//              '\x{0}]/u',             // NULL byte
+//            '', $input);
+//  $output = str_replace('"', '&quot;', $output);      // encode quote
+//  $output = str_replace('&', '&amp;', $output);       // encode ampersand
+//  $output = str_replace("'", '&apos;', $output);      // encode apostrophe
+//  $output = str_replace('<', '&lt;', $output);        // encode left-angled bracket
+//  $output = str_replace('>', '&rt;', $output);        // encode right-angled bracket
+//  return $output;
+//}
 
 
 /**
@@ -54,7 +215,7 @@ function views_xhtml_strip_illegal_chars($input) {
  * @return
  *   Either the original input or a date string.
  */
-function views_xhtml_is_date($input) {
+function _views_xhtml_is_date($input) {
   if (strpos($input, 'a:3:{s:5:"month"') !== 0) {
     return $input;
   }
