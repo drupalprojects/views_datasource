@@ -37,15 +37,3 @@ function views_rdf_views_plugins() {
   );
 }
 
-
-/**
- * Theme preprocess function for views-view-rdf.tpl.php
- *
- * @param $vars
- *   Template variables.
- */
-function template_preprocess_views_view_rdf(&$vars) {
-  $view     = &$vars['view'];
-  $options  = $view->style_handler->options;
-  $handler  = $view->style_handler;
-}

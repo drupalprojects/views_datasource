@@ -6,7 +6,7 @@
  *
  * - $view: The View object.
  * - $rows: Array of row objects as rendered by _views_xml_render_fields
- * - $entries Array of Atom entries as created by template_preprocess_views_views_xml_style_atom 
+ * - $persons Array of person objects as created by template_preprocess_views_views_rdf_style_foaf 
  *
  * @ingroup views_templates
  */
@@ -41,7 +41,7 @@ foreach($persons as $person) {
  	if (array_key_exists("homepage", $person))          $xml .= "  <foaf:homepage rdf:resource=\"".$person["homepage"]."\">".$person["homepage"]."</foaf:homepage>\n";
  	if (array_key_exists("weblog", $person))            $xml .= "  <foaf:weblog rdf:resource=\"".$person["weblog"]."\">".$person["weblog"]."</foaf:weblog>\n";
  	if (array_key_exists("img", $person))               $xml .= "  <foaf:img rdf:resource=\"".$person["img"]."\">".$person["img"]."</foaf:img>\n";
- 	if (array_key_exists("img", $person))               $xml .= "  <foaf:depiction rdf:resource=\"".$person["img"]."\">".$person["img"]."</foaf:depiction>\n";
+ 	if (array_key_exists("depiction", $person))         $xml .= "  <foaf:depiction>".$person["depiction"]."</foaf:depiction\n";
  	if (array_key_exists("member", $person))            $xml .= "  <foaf:openid>".$person["member"]."</foaf:member>\n";
  	if (array_key_exists("phone", $person))             $xml .= "  <foaf:phone>".$person["phone"]."</foaf:phone>\n";
  	if (array_key_exists("jabberID", $person))          $xml .= "  <foaf:jabberID>".$person["jabberID"]."</foaf:jabberID>\n";

@@ -76,8 +76,7 @@ class views_plugin_style_rdf extends views_plugin_style {
       '#options'        => array(
          'default'      => t("Default: application/rdf+xml for FOAF and SIOC documents."),  
          'text/xml'     => 'text/xml',
-         'application/atom+rdf'  => 'application/atom+rdf'
-         ),
+       ),
       '#default_value'  => $this->options['content_type'],
       '#description'    => t('The Content-Type header that will be sent with the XML output.')
     );
