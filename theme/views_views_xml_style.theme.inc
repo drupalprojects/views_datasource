@@ -28,6 +28,67 @@ function theme_views_views_xml_style(&$view, $rows = array(), $attachment = NULL
 	if ($options['schema'] == 'atom') return theme('views_views_xml_style_atom', $view, $rows, $attachment, $options);
 }
 
+function template_preprocess_views_views_xml_style_raw(&$vars) {
+	$view = &$vars["view"];
+  $rows = &$vars["rows"];
+  $options = &$vars["options"];  
+  $base = $view->base_table;
+  $root = $options['root_element'];
+  $plaintext_output = $options["plaintext_output"];
+  $content_type = ($options['content_type'] == 'default') ? 'text/xml' : $options['content_type'];
+  $header = $options['header'];
+  $xml =  "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+  if ($header) $xml.= $header."\n"; 
+	$xml .= "<$root>\n";
+  foreach($rows as $row) {
+		$xml .= ($options['element_output'] == 'nested') ? "  <$base>\n": "  <$base\n";
+	  foreach($row as $id => $object) {
+		  if ($options['field_output'] == 'normal')  {
+		    if ($object->label) 
+		      $label = _views_xml_strip_illegal_xml_name_chars(check_plain(html_entity_decode(strip_tags($object->label))));
+		    else  $label = _views_xml_strip_illegal_xml_name_chars(check_plain(html_entity_decode((strip_tags($id)))));
+		    if (!$object->is_multiple) 
+		      $content = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($object->content))) : $object->content);
+		    else {
+		      foreach($object->content as $oc) $content[] = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc);
+		    }
+		  }
+		  elseif ($options['field_output'] == 'raw') {
+		    $label = _views_xml_strip_illegal_xml_name_chars(check_plain(html_entity_decode(strip_tags($id))));
+		    $content = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($object->raw))) : $object->raw);
+		  }
+		  if ($options['element_output'] == 'nested') {
+			  if (!is_array($content)) {
+			  }
+			  else {
+			  	foreach ($content as $c) {
+		  	    $xml .= "    <$label>\n";
+			      $xml .= "      ".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$c]]>\n": $c."\n");
+			      $xml .= "    </$label>\n";			  		
+			  	}			  	
+			  }
+		  }
+		  elseif($options['element_output'] == 'attributes') {
+		  	if (!is_array($content)) {
+          $content = _views_xml_strip_illegal_xml_attribute_value_chars($content);
+          $label = _views_xml_strip_illegal_xml_name_chars($label);
+		      $xml .= " $label=\"$content\" ";
+		  	}
+		  	else {
+			  	foreach ($content as $c) {
+            $c = _views_xml_strip_illegal_xml_attribute_value_chars($c);
+            $label = _views_xml_strip_illegal_xml_name_chars($label);
+		        $xml .= " $label=\"$c\" ";
+			  	}			  			  		
+		  	}
+		  }
+	  }
+	  $xml .= ($options['element_output'] == 'nested') ? "  </$base>\n": "/>\n";
+	}
+	$xml .= "</$root>\n";
+	$vars["xml"] = $xml;
+}
+
 function template_preprocess_views_views_xml_style_opml(&$vars) {
 	global $user;
 	global $base_url; 
@@ -40,7 +101,7 @@ function template_preprocess_views_views_xml_style_opml(&$vars) {
   $vars["content_type"] = ($options['content_type'] == 'default') ? 'text/html' : $options['content_type'];
   $header  = $options["header"];
   $author = _views_xml_format_author($options["author"]);
-  if (!$vars["header"]) {
+  if (!$header) {
   	$vars["title"] = ($view->get_title() ? $view->get_title(): $view->name);
   	$vars["dateCreated"] = format_date(time(), 'custom', DATE_RFC822);
   	$vars["ownerName"] = $author["name"];
@@ -53,16 +114,17 @@ function template_preprocess_views_views_xml_style_opml(&$vars) {
   	$outline = array();
   	foreach ($row as $field) {
   	  if ($options["field_output"] == "normal") {
-  	  	$label = $plaintext_output ? check_plain(strip_tags($field->label)) : $field->label;
-  	  	$content = $plaintext_output ? check_plain(strip_tags($field->content)) : $field->content;
+  	  	if ($field->label) 
+  	  	  $label = _views_xml_strip_illegal_xml_name_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label);
+  	  	else $label = _views_xml_strip_illegal_xml_name_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id);  
+  	  	$content = _views_xml_strip_illegal_xml_attribute_value_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content);
   	  }
   	  elseif ($options["field_output"] == "raw") {
-  	  	$label = $plaintext_output ? check_plain(strip_tags($field->id)) : $field->id;
-  	  	$content = $plaintext_output ? check_plain(strip_tags($field->raw)) : $field->raw;
+  	  	$label = _views_xml_strip_illegal_xml_name_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id);
+  	  	$content =_views_xml_strip_illegal_xml_attribute_value_chars( $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->raw))) : $field->raw);
   	  }
   	  $content = _views_xml_strip_illegal_xml_attribute_value_chars($content);
-  	  $label = _views_xml_strip_illegal_xml_name_chars(check_plain(strip_tags($label)));
-  	  if (($options["skip_empty_fields"] == TRUE) && (is_null($content) || $content == "")) continue;
+  	  $label = _views_xml_strip_illegal_xml_name_chars(check_plain(html_entity_decode(strip_tags($label))));
   	  	  
 		  /* OPML text attribute */
 			if (!array_key_exists("text", $outline)) {
@@ -163,11 +225,11 @@ function template_preprocess_views_views_xml_style_atom(&$vars) {
   $plaintext_output = $options["plaintext_output"];
   $vars["content_type"] = ($options['content_type'] == 'default') ? 'application/atom+xml' : $options['content_type'];
   $header  = $options["header"];
-  if (!$vars["header"]) {
+  if (!$header) {
   	$vars["title"] = check_plain(($view->get_title() ? $view->get_title(): $view->name));
   	$vars["id"] = check_url($view->get_url());
   	$vars["updated"] = format_date(time(), 'custom', DATE_ATOM);
-  	$vars["author"] = _views_xml_format_author($options["author"]);
+  	$vars["author"] = _views_xml_format_author($options["author"]);  
     $vars['link'] = check_url(url($view->display_handler->get_path(), $url_options));
   } else $vars["header"] = $header;
 	$entries = array();
@@ -175,14 +237,16 @@ function template_preprocess_views_views_xml_style_atom(&$vars) {
   	$entry = array();
   	foreach ($row as $field) {
   	  if ($options["field_output"] == "normal") {
-  	  	$label = $plaintext_output ? check_plain(strip_tags($field->label)) : $field->label;
-  	  	$content = $plaintext_output ? check_plain(strip_tags($field->content)) : $field->content;
+  	  	if ($field->label)
+  	  	  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
+  	  	else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+  	  	$content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
   	  }
   	  elseif ($options["field_output"] == "raw") {
-  	  	$label = $plaintext_output ? check_plain(strip_tags($field->id)) : $field->id;
-  	  	$content = $plaintext_output ? check_plain(strip_tags($field->raw)) : $field->raw;
+  	  	$label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+  	  	$content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->raw))) : $field->raw;
   	  }
-  	  $label = _views_xml_strip_illegal_xml_name_chars(check_plain(strip_tags($label)));
+  	  $label = _views_xml_strip_illegal_xml_name_chars(html_entity_decode(check_plain(strip_tags($label))));
   	  //if (($options["skip_empty_fields"] == TRUE) && (is_null($content) || $content === "")) continue;
   	  
   	  /* Atom id attribute */			
@@ -203,19 +267,8 @@ function template_preprocess_views_views_xml_style_atom(&$vars) {
 
 	  	/* Atom updated attribute */
 	  	if (!array_key_exists("updated", $entry)) {
-	  		$value = NULL;
 	      if (drupal_strtolower($label) == "updated") {
 	      	$value = $content;
-	      }
-	      if ($value) {
-	        $value = $field->raw; //@todo Hmmm
-	      	if (intval($value))  // timestamp
-            $value = format_date(intval($value), 'custom', DATE_ATOM);
-          elseif (getdate($value))      // string date
-            $value = format_date(strtotime($value), 'custom', DATE_ATOM);
-	        //otherwise just pass the string as is
-          $entry["updated"] = $value;
-	  	    continue;
 	      }
 	  	}
   	  
@@ -296,14 +349,15 @@ function template_preprocess_views_views_xml_style_atom(&$vars) {
 	      $value = $entry["changed"];
 	    }
 	    elseif (array_key_exists("updatedcommenteddate", $entry)) {
-	      $value = $entry["updatedcommenteddate"];
+	      $value = $entry["updated/commented date"];
 	    }
 	    elseif (array_key_exists("lastcommenttime", $entry)) {
-	      $value = $entry["lastcommenttime"];
+	      $value = $entry["last comment time"];
 	    }
 	  	elseif (array_key_exists("last_comment_timestamp", $entry)) {
 	      $value = $entry["last_comment_timestamp"];
 	    }
+	    //_views_rdf_debug_stop($value);
 	    if ($value) {
 	      if (is_numeric($value))  { // timestamp
           //_views_xml_debug_stop($value);  
