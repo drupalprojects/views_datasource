@@ -49,6 +49,89 @@ function views_xml_theme() {
    );
 }  
 
+
+/**
+ * We almost duplicate the content_handler_field_multiple::render function
+ * to get the multiple rendered field values in an array
+ * @param $field
+ * @param $values
+ * @return unknown_type
+ */
+function _views_xml_render_multiple_field($field, $values) {
+    $options = $field->options;
+	  // If this is not a grouped field, use content_handler_field::render().
+    if (!$field->defer_query) {
+      return $field->render($values);
+    }
+    // We're down to a single node here, so we can retrieve the actual field
+    // definition for the node type being considered.
+    $content_field = content_fields($field->content_field['field_name'], $values->{$field->aliases['type']});
+    $vid = $values->{$field->field_alias};
+    if (isset($field->field_values[$vid])) {
+      // Gather items, respecting the 'Display n values starting from m' settings.
+      $count_skipped = 0;
+      $items = array();
+      foreach ($field->field_values[$vid] as $item) {
+        if (empty($options['multiple']['multiple_from']) || ($count_skipped >= $options['multiple']['multiple_from'])) {
+          if (empty($options['multiple']['multiple_number']) || (count($items) < $options['multiple']['multiple_number'])) {
+            // Grab the nid - needed for render_link().
+            $nid = $item['_nid'];
+            unset($item['_nid']);
+            $items[] = $item;
+          }
+          else {
+            break;
+          }
+        }
+        $count_skipped++;
+      }
+
+      // Build a pseudo-node from the retrieved values.
+      $node = drupal_clone($values);
+      // content_format and formatters will need a 'type'.
+      $node->type = $values->{$field->aliases['type']};
+      $node->nid = $values->{$field->aliases['nid']};
+      $node->vid = $values->{$field->aliases['vid']};
+
+      // Some formatters need to behave differently depending on the build_mode
+      // (for instance: preview), so we provide one.
+      $node->build_mode = NODE_BUILD_NORMAL;
+
+      // Render items.
+      $formatter_name = $options['format'];
+      if ($items && ($formatter = _content_get_formatter($formatter_name, $content_field['type']))) {
+        $rendered = array();
+        if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
+          // Single-value formatter.
+          $n = 0;
+          foreach ($items as $item) {
+            $output = content_format($content_field, $item, $formatter_name, $node);
+            if (!empty($output)) {
+              $rendered[++$n] = $field->render_link($output, (object) array('nid' => $nid));
+            }
+          }
+        }
+        else {
+          // Multiple values formatter.
+          $output = content_format($content_field, $items, $formatter_name, $values);
+          if (!empty($output)) {
+            $rendered[++$n] = $field->render_link($output, (object) array('nid' => $nid));
+          }
+        }
+        if (count($rendered) > 1) {
+          // TODO: could we use generic field display ?
+          //return theme('content_view_multiple_field', $rendered, $content_field, $values);
+          return $rendered;
+        }
+        elseif ($rendered) {
+          return $rendered[1];
+        }
+      }
+    }
+
+    return '';
+}
+    
 /**
  * Takes each field from a row object and renders the field as determined by the field's theme 
  * 
@@ -59,27 +142,36 @@ function views_xml_theme() {
  * @return array
  *   Object containing all the raw and rendered fields  
  */
-
 function _views_xml_render_fields(&$view, $row) {
-  $rendered_fields = array();
+	$rendered_fields = array();
   $field_ids = array_keys($view->field);
-  
-  foreach ($field_ids as $id) {
-    $field = &$view->field[$id];
-    //$field_output = $field->theme($row);
-    $field_output = $view->field[$field->options['id']]->advanced_render($row);
+  foreach ($field_ids as $id) {  
+  	$field = &$view->field[$id];
+    $field_is_multiple = FALSE;
+    $field_raw = array();
+    if ((isset($field->options['multiple']['group']))&& isset($field->field_values)) {    	
+    	$field_output = _views_xml_render_multiple_field($field, $row);
+    	$n = 0;
+    	if (is_array($field_output)) {
+    	  foreach ($field->field_values[$row->{$field->field_alias}] as $item) {
+          $field_raw[++$n] = $item["value"];            		
+    	  }
+    	  $field_is_multiple = TRUE;
+    	}
+    	else $field_raw = $view->field[$field->options['id']]->advanced_render($row);     	 
+    }    
+    else {
+      $field_output = $view->field[$field->options['id']]->advanced_render($row);
+      $field_raw = (isset($view->field[$id]->field_alias) && isset($row->{$view->field[$id]->field_alias})) ? $row->{$view->field[$id]->field_alias} : NULL;
+    }
     if (empty($field->options['exclude'])) {
       $object = new stdClass();
       $object->id = $id;
       $object->content = $field_output;
-      if (isset($view->field[$id]->field_alias) && isset($row->{$view->field[$id]->field_alias})) {
-        $object->raw = $row->{$view->field[$id]->field_alias};
-      }
-      else {
-        $object->raw = NULL; // make sure it exists to reduce NOTICE
-      }
+      $object->raw = $field_raw;
       $object->class = views_css_safe($id);
       $object->label = check_plain($view->field[$id]->label());
+      $object->is_multiple = $field_is_multiple;       
       $rendered_fields[$id] = $object;
     }
   }
@@ -134,7 +226,8 @@ function _views_xml_format_author($username) {
 	else $user = user_load(array('name'=>$username));
 	if (!$user) {
 		//$author["name"] = variable_get('anonymous', t('Anonymous'));
-		$author["name"] = variable_get('anonymous', t('Anonymous'));
+		//$author["name"] = variable_get('anonymous', t('Anonymous'));
+		$author["name"] = $username;
 		$author["email"] = variable_get('site_mail', 'none@none.info');
 		return $author;
 	}
@@ -154,7 +247,6 @@ function _views_xml_format_author($username) {
 	}
 }
    
-
 /**
  * If input is a serialized date array, return a date string
  *
@@ -174,112 +266,6 @@ function views_xml_is_date($input) {
   }
 }
 **/
-
-function xml_atom_render($view) {
-  global $base_url;
-
-  $xml .= '<?xml version="1.0" encoding="UTF-8" ?>'."\n";
-  $xml .= '<!-- generator="Drupal Views_Datasource.Module" -->'."\n";
-  $xml .='<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">'."\n";
-  $xml .='  <title>'. $view->name .'</title>'."\n";
-  $xml .='  <link rel="alternate" type="text/html" href="'. $base_url .'"/>'."\n";
-  $xml .='  <link rel ="self" type="application/atom+xml" href="'. $base_url .'/'. $view->display_handler->options['path'] .'"/>'."\n";
-  $xml .='  <id>'. $base_url .'/'. $view->display_handler->options['path'] .'</id>'."\n";       // use path as id
-  $xml .='  <updated>###feed_updated###</updated>'."\n";        // will set later
-  $xml .='  <generator>Views Datasource module</generator>'."\n";
-  $feed_last_updated = 0;
-  foreach ($view->result as $node) {
-    $entry = array();
-    foreach ($node as $field_name => $field_value) {
-      $label = views_xml_strip_illegal_chars($field_name);
-      $value = views_xml_strip_illegal_chars(views_xml_is_date($field_value));
-      if (is_null($value) || ($value === '')) continue;
-//      if (preg_match('/\d/', $value)) {
-//        if (strtotime($value))
-//          $value = date(DATE_ISO8601, strtotime($value));
-//      }
-      $label = str_replace('_value', '', str_replace("profile_values_profile_", '', $label));       // strip out Profile: from profile fields
-      if (drupal_strtolower($label) == 'nid') $entry['nid'] = $value;
-      if ((drupal_strtolower($label) == 'updated') || (drupal_strtolower($label) == 'updated date') || (drupal_strtolower($label) == 'node_changed')) {
-        if (intval($value))       // timestamp
-          $entry['updated'] = intval($value) ;
-        elseif (getdate($value)) {      // string date
-          $entry['updated'] = strtotime($value);
-        }
-      }
-      if ((drupal_strtolower($label) == 'title') || (drupal_strtolower($label) == 'node_title'))
-        $entry['title'] = $value;
-      if (drupal_strtolower($label) == 'link') $entry['link'] = $value;
-      if ((drupal_strtolower($label) == 'published') || (drupal_strtolower($label) == 'node_created')) {
-        if (intval($value))       // timestamp
-          $entry['published'] =  intval($value) ;
-        elseif (getdate($value)) {      // string date
-          $entry['published'] = strtotime($value);
-        }
-      }
-      if ((drupal_strtolower($label) == 'author') || (drupal_strtolower($label) == 'users_name')) $entry['author'] = $value;
-      if ((drupal_strtolower($label) == 'email') || (drupal_strtolower($label) == 'users_mail')) $entry['email'] = $value;
-      if ((drupal_strtolower($label) == 'content') || (drupal_strtolower($label) == 'node_revisions_body')) $entry['content'] = $value;
-      if ((drupal_strtolower($label) == 'summary') || (drupal_strtolower($label) == 'node_teaser') || (drupal_strtolower($label) == 'node_revisions_teaser')) $entry['summary'] = $value;
-    }
-    if (isset($entry['nid']) && (isset($entry['updated'])) && (isset($entry['link'])) && (isset($entry['title'])) && (isset($entry['published']))) {
-      if (parse_url($entry['link']))
-        $link = $entry['link'];
-      else {
-        print '<b style="color:red">The link URL is not valid.</b>';
-        return;
-      }
-    }
-    elseif (isset($entry['nid']) && (isset($entry['updated'])) && (isset($entry['title'])) && (isset($entry['published']))) {       // make the entry path with base_url + nid {
-      $entry['link'] = $base_url .'/index.php?q=node/'. $entry['nid'];
-    }
-    else {
-      print '<b style="color:red">The fields "nid", "title", "post date", and "updated date" must exist.';
-      return;
-    }
-    $link = $entry['link'];
-    $link_url = parse_url($link);
-    $nid = $entry['nid'];
-    $updated = $entry['updated'];
-    if ($updated > $feed_last_updated) $feed_last_updated = $updated;         // Overall feed updated is the most recent node updated timestamp
-    $title = $entry['title'];
-    $published = $entry['published'];
-    $author = $entry['author'];
-    $mail = $entry['email'];
-    $content = $entry['content'];
-    $summary = $entry['summary'];
-
-    // Create an id for the entry using tag URIs
-    $id = 'tag:'. $link_url['host'] .','. format_date($updated, 'custom', 'Y-m-d') .':'. $link_url['path'] .'?'. $link_url['query'];
-    $xml .= '  <entry>'."\n";
-    $xml .= '    <id>'. $id .'</id>'."\n";
-    $xml .= '    <updated>'. format_date($updated, 'custom', DATE_ATOM) .'</updated>'."\n";
-    $xml .= '    <title type="text">'. $title .'</title>'."\n";
-    $xml .= '    <link rel="alternate" type="text/html" href="'. $link .'"/>'."\n";
-    $xml .= '    <published>'. format_date($published, 'custom', DATE_ATOM) .'</published>'."\n";
-    if ($author) {
-      if ($mail) {
-        $xml .= '    <author><name>'. $author .'</name><email>'. $mail .'</email></author>'."\n";
-      }
-      else $xml .= '    <author><name>'. $author .'</name></author>'."\n";
-    }
-    if ($content) $xml .= '    <content type="html" xml:base="'. $base_url .'"><![CDATA['. $content .']]></content>'."\n";
-    if ($summary) $xml .= '    <summary type="html" xml:base="'. $base_url .'"><![CDATA['. $summary .']]></summary>'."\n";
-    $xml .= '  </entry>'."\n";
-  }
-  $xml .='</feed>'."\n";
-  $xml = str_replace('###feed_updated###', format_date($feed_last_updated, 'custom', DATE_ATOM), $xml);
-  if ($view->override_path) {       // inside live preview
-    print htmlspecialchars($xml);
-  }
-  else {
-    drupal_set_header('Content-Type: application/atom+xml');
-    print $xml;
-    // var_dump($label);
-    module_invoke_all('exit');
-    exit;
-  }
-}
 
 function _views_xml_debug_stop($var) {
 	var_dump($var);

@@ -22,9 +22,9 @@ class views_plugin_style_xml extends views_plugin_style {
     $options['root_element'] = array('default' => 'node', 'translatable' => TRUE);
     $options['field_output'] = array('default' => 'normal', 'translatable' => TRUE);
     $options['plaintext_output'] = array('default' => TRUE, 'translatable' => TRUE);
-    $options['skip_empty_fields'] = array('default' => TRUE, 'translatable' => TRUE);
+    /*$options['skip_empty_fields'] = array('default' => TRUE, 'translatable' => TRUE);*/
     $options['element_output'] = array('default' => 'nested', 'translatable' => TRUE);
-    $options['escape_as_CDATA'] = array('default' => 'yes', 'translatable' => TRUE);
+    $options['escape_as_CDATA'] = array('default' => 'no', 'translatable' => TRUE);
     $options['content_type'] = array('default' => 'text/xml', 'translatable' => FALSE);
     $options['header'] = array('default' => NULL, 'translatable' => FALSE);
     $options['author'] = array('default' => $user->name, 'translatable' => FALSE);
@@ -68,12 +68,13 @@ class views_plugin_style_xml extends views_plugin_style {
       '#default_value'  => $this->options['plaintext_output'],
       '#description'    => t('For each row in the view, strip all markup from the field output.'),
     );
+    /*
     $form['skip_empty_fields'] = array(
       '#type'           => 'checkbox',
       '#title'          => t('Skip adding fields that are empty.'),
       '#default_value'  => $this->options['skip_empty_fields'],
       '#description'    => t('For each row in the view, skip adding a field if the field value is NULL or blank.'),
-    );    
+    );*/    
     $form['element_output']  = array(
       '#type' => 'radios',
       '#title' => 'Element output',
@@ -106,7 +107,7 @@ class views_plugin_style_xml extends views_plugin_style {
          'text/x-opml'  => 'text/x-opml'
          ),
       '#default_value'  => $this->options['content_type'],
-      '#description'    => t('The Content-Type header that will be sent with the JSON output.')
+      '#description'    => t('The Content-Type header that will be sent with the XML output.')
     );
     $form['author'] = array (
       '#type' => 'textfield',
@@ -138,13 +139,11 @@ class views_plugin_style_xml extends views_plugin_style {
   	$view = &$this->view;
   	$options = $this->options;
   	$field = $view->field;
-
+  	
  	  $rows = array();
- 	 
     foreach ($view->result as $row) {
       $rows[] = _views_xml_render_fields($view, $row);
     }
-    
  	  return theme($this->theme_functions(), $this->view, $rows, $this->attachment, $this->options); 	  
  	}
  
