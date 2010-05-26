@@ -40,8 +40,11 @@
     }
     $xml .= "      <outline";
     foreach($outline as $n => $v) {
+    	if (is_array($v)) {
+    		foreach ($v as $i => $j) $xml .= " $n$i = \"$j\"";
+    	}
     	//_views_xml_debug_stop($outline);
-    	$xml .= " $n = \"$v\"";
+    	else $xml .= " $n = \"$v\"";
     }
     $xml .= "/>\n";
   }   	

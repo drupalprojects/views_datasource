@@ -31,6 +31,7 @@ function theme_views_views_xml_style(&$view, $rows = array(), $attachment = NULL
 function template_preprocess_views_views_xml_style_raw(&$vars) {
 	$view = &$vars["view"];
   $rows = &$vars["rows"];
+  
   $options = &$vars["options"];  
   $base = $view->base_table;
   $root = $options['root_element'];
@@ -50,15 +51,26 @@ function template_preprocess_views_views_xml_style_raw(&$vars) {
 		    if (!$object->is_multiple) 
 		      $content = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($object->content))) : $object->content);
 		    else {
-		      foreach($object->content as $oc) $content[] = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc);
-		    }
+		    	$content = array ();		   
+		    	foreach($object->content as $n=>$oc) {
+		    		$content[$n] = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc);		    		
+		    	}
+		    }		    
 		  }
 		  elseif ($options['field_output'] == 'raw') {
 		    $label = _views_xml_strip_illegal_xml_name_chars(check_plain(html_entity_decode(strip_tags($id))));
-		    $content = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($object->raw))) : $object->raw);
+		   if (!$object->is_multiple) 
+		      $content = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($object->raw))) : $object->raw);
+		    else {
+		    	foreach($object->raw as $n=>$oc) $content[$n] = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc);
+		    }
 		  }
+		  
 		  if ($options['element_output'] == 'nested') {
+		  	
 			  if (!is_array($content)) {
+			  	$xml .= "      <$label>".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>\n": $content."</$label>\n");
+			  	//_views_xml_debug_stop($xml);
 			  }
 			  else {
 			  	foreach ($content as $c) {
@@ -75,14 +87,15 @@ function template_preprocess_views_views_xml_style_raw(&$vars) {
 		      $xml .= " $label=\"$content\" ";
 		  	}
 		  	else {
-			  	foreach ($content as $c) {
+			  	foreach ($content as $n=>$c) {
             $c = _views_xml_strip_illegal_xml_attribute_value_chars($c);
             $label = _views_xml_strip_illegal_xml_name_chars($label);
-		        $xml .= " $label=\"$c\" ";
+		        $xml .= " $label$n=\"$c\" ";
 			  	}			  			  		
 		  	}
 		  }
 	  }
+
 	  $xml .= ($options['element_output'] == 'nested') ? "  </$base>\n": "/>\n";
 	}
 	$xml .= "</$root>\n";
@@ -116,16 +129,24 @@ function template_preprocess_views_views_xml_style_opml(&$vars) {
   	  if ($options["field_output"] == "normal") {
   	  	if ($field->label) 
   	  	  $label = _views_xml_strip_illegal_xml_name_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label);
-  	  	else $label = _views_xml_strip_illegal_xml_name_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id);  
-  	  	$content = _views_xml_strip_illegal_xml_attribute_value_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content);
+  	  	else $label = _views_xml_strip_illegal_xml_name_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id);
+  	    if (!$field->is_multiple) 
+		      $content = _views_xml_strip_illegal_xml_attribute_value_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content);
+		    else {		    	
+		    	$content = array();
+		    	foreach($field->content as $n=>$oc) $content[$n] = _views_xml_strip_illegal_xml_attribute_value_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc);
+		    }  	  	  
   	  }
   	  elseif ($options["field_output"] == "raw") {
-  	  	$label = _views_xml_strip_illegal_xml_name_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id);
-  	  	$content =_views_xml_strip_illegal_xml_attribute_value_chars( $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->raw))) : $field->raw);
+  	  	$label = _views_xml_strip_illegal_xml_name_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id);  	  	
+  	    if (!$field->is_multiple) 
+		      $content = _views_xml_strip_illegal_xml_attribute_value_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw);
+		    else { 
+		    	$content = array();
+		    	foreach($field->raw as $n=>$oc) $content[$n] = _views_xml_strip_illegal_xml_attribute_value_chars($plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc);
+		    }  	  	
   	  }
-  	  $content = _views_xml_strip_illegal_xml_attribute_value_chars($content);
-  	  $label = _views_xml_strip_illegal_xml_name_chars(check_plain(html_entity_decode(strip_tags($label))));
-  	  	  
+  	    	  	  
 		  /* OPML text attribute */
 			if (!array_key_exists("text", $outline)) {
 			  if (drupal_strtolower($label) == "text") {
@@ -201,6 +222,7 @@ function template_preprocess_views_views_xml_style_opml(&$vars) {
 		}
     $outlines[] = $outline;
   }	
+  //_views_xml_debug_stop($outlines);
   $vars["outlines"] = $outlines;   
 }
 
@@ -240,13 +262,25 @@ function template_preprocess_views_views_xml_style_atom(&$vars) {
   	  	if ($field->label)
   	  	  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
   	  	else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	$content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
-  	  }
+  	  	if (!$field->is_multiple) 
+		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+		    else {		    	
+		    	$content = array();
+		    	foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+		    }  	  	    	  	
+  	  }  	  
   	  elseif ($options["field_output"] == "raw") {
   	  	$label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
   	  	$content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->raw))) : $field->raw;
+  	    if (!$field->is_multiple) 
+		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
+		    else { 
+		      $content = array();
+		      foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+		    }  	  	
+  	  	
   	  }
-  	  $label = _views_xml_strip_illegal_xml_name_chars(html_entity_decode(check_plain(strip_tags($label))));
+  	  $label = _views_xml_strip_illegal_xml_name_chars(html_entity_decode(check_plain(strip_tags($label))));  	  
   	  //if (($options["skip_empty_fields"] == TRUE) && (is_null($content) || $content === "")) continue;
   	  
   	  /* Atom id attribute */			
@@ -396,11 +430,12 @@ function template_preprocess_views_views_xml_style_atom(&$vars) {
 	    }
   	}  	
   	
-	  $entry["id"] = check_plain($entry["id"]); $entry["title"] = check_plain($entry["title"]); $entry["updated"] = check_plain($entry["updated"]);
-	  //_views_xml_debug_stop($entry);
+  	if (isset($entry["id"])) $entry["id"] = check_plain($entry["id"]);
+  	if (isset($entry["title"])) $entry["title"] = check_plain($entry["title"]);
+  	if (isset($entry["update"])) $entry["updated"] = check_plain($entry["updated"]);
 	  $entries[] = $entry;
 	  
   }//for
-  //_views_xml_debug_stop($entries);
+ 
   $vars["entries"] = $entries;  
 }

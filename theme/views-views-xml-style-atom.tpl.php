@@ -10,6 +10,7 @@
  *
  * @ingroup views_templates
  */
+
 global $base_url;
 $content_type = ($options['content_type'] == 'default') ? 'application/atom+xml' : $options['content_type'];
 $xml .= "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
@@ -28,7 +29,8 @@ else {
 }
 
 foreach($entries as $entry) {
-    if (!(array_key_exists("id", $entry)) && array_key_exists("title", $entry) && array_key_exists("updated", $entry)) {
+	//_views_xml_debug_stop($entry);
+    if (!((array_key_exists("id", $entry)) && array_key_exists("title", $entry) && array_key_exists("updated", $entry))) {
       if ($view->override_path)
         print '<b style="color:red">Either the id, title, or updated attribute is missing.</b>';
       elseif ($options['using_views_api_mode'])
@@ -51,8 +53,15 @@ foreach($entries as $entry) {
     	if ($author_email) $xml .= "      <email>$author_email</email>\n";
     	$xml .= "    </author>\n";
     }
-    foreach($entry as $l => $v) {
-    	if (($l != "id") && ($l != "title") && ($l != "updated") && ($l != "author") && ($l != "link") && ($l != "teaser") && ($l != "content")) $xml .= "    <$l>".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$v]]>": "$v")."  </$l>\n"; //Then the rest
+    foreach($entry as $l => $v) { //Then the rest
+    	if (($l != "id") && ($l != "title") && ($l != "updated") && ($l != "author") && ($l != "link") && ($l != "teaser") && ($l != "content")) {
+    	  if (is_array($v)) {
+    	    foreach($v as $i => $j) {
+    	        $xml .= "    <$l>\n".(($options['escape_as_CDATA'] == 'yes') ? "          <![CDATA[$j]]>\n": "      $j")."\n    </$l>\n"; 	
+    	    }	
+    	  }
+    	  else 	$xml .= "    <$l>".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$v]]>": "$v")."</$l>\n";
+    	}
     }
     $xml .= "  </entry>\n";
   }

@@ -8,6 +8,7 @@
  * - $rows: Array of row objects as rendered by _views_xml_render_fields 
  *
  * @ingroup views_templates
+ * @see views_views_xml_style.theme.inc
  */	
 	if ($view->override_path) {       // inside live preview
     print htmlspecialchars($xml);

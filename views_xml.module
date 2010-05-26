@@ -143,8 +143,8 @@ function _views_xml_render_multiple_field($field, $values) {
  *   Object containing all the raw and rendered fields  
  */
 function _views_xml_render_fields(&$view, $row) {
-	$rendered_fields = array();
   $field_ids = array_keys($view->field);
+  $rendered_fields = array();
   foreach ($field_ids as $id) {  
   	$field = &$view->field[$id];
     $field_is_multiple = FALSE;
@@ -164,16 +164,17 @@ function _views_xml_render_fields(&$view, $row) {
       $field_output = $view->field[$field->options['id']]->advanced_render($row);
       $field_raw = (isset($view->field[$id]->field_alias) && isset($row->{$view->field[$id]->field_alias})) ? $row->{$view->field[$id]->field_alias} : NULL;
     }
-    if (empty($field->options['exclude'])) {
-      $object = new stdClass();
+    
+    if (empty($field->options['exclude']) && ($field_output != "") && !empty($field_output)) {
+    	$object = new stdClass();      
       $object->id = $id;
       $object->content = $field_output;
       $object->raw = $field_raw;
       $object->class = views_css_safe($id);
       $object->label = check_plain($view->field[$id]->label());
       $object->is_multiple = $field_is_multiple;       
-      $rendered_fields[$id] = $object;
-    }
+      $rendered_fields[$id] = $object;      
+    } 
   }
   return $rendered_fields;
 }

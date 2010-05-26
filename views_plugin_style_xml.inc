@@ -141,10 +141,12 @@ class views_plugin_style_xml extends views_plugin_style {
   	$field = $view->field;
   	
  	  $rows = array();
-    foreach ($view->result as $row) {
-      $rows[] = _views_xml_render_fields($view, $row);
+    
+ 	  foreach ($view->result as $row) {    	      
+    	$rows[] = _views_xml_render_fields($view, $row);        
     }
- 	  return theme($this->theme_functions(), $this->view, $rows, $this->attachment, $this->options); 	  
+    //_views_xml_debug_stop($rows);
+    return theme($this->theme_functions(), $this->view, $rows, $this->attachment, $this->options); 	  
  	}
  
 }
