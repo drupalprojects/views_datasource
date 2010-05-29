@@ -26,28 +26,41 @@ function template_preprocess_views_views_json_style_simple(&$vars) {
   $options = $vars["options"];
   $base = $view->base_table;
   $root_object = $options["root_object"];
+  $top_child_object = $options["top_child_object"];
   $plaintext_output = $options["plaintext_output"];	
 	$objects = array();
   foreach($rows as $row) {
-  	$object = array($base => array());
+  	$object = array($top_child_object => array());
   	/*Convert the $rows into a hierachial key=>value array*/
   	foreach ($row as $field) {
   	  if ($options["field_output"] == "normal") {
   	  	if ($field->label)
   	  	  $label = $plaintext_output ? strip_tags($field->label) : $field->label;
   	  	else $label = $plaintext_output ? strip_tags($field->id) : $field->id;  
-  	  	$content = $plaintext_output ? strip_tags($field->content) : $field->content;
+        if (!$field->is_multiple) {   	  	
+  	  	  $content = $plaintext_output ? strip_tags($field->content) : $field->content;
+        }
+        else {
+        	$content = array();
+        	foreach($field->content as $n=>$oc) $content[$n] = ($plaintext_output ? strip_tags($oc) : $oc);
+        }
   	  }
   	  elseif ($options["field_output"] == "raw") {
   	  	$label = $plaintext_output ? strip_tags($field->id) : $field->id;
-  	  	$content = $plaintext_output ? strip_tags($field->raw) : $field->raw;
+  	    if (!$field->is_multiple) {   	  	
+  	  	  $content = $plaintext_output ? strip_tags($field->raw) : $field->raw;
+        }
+        else {
+        	$content = array();
+        	foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? strip_tags($oc) : $oc;
+        }
   	  }	
-  	$object[$base][$label] = $content;
+  	  $object[$top_child_object][$label] = $content;
   	}
   	$objects[] = $object;
   }	 
+  
   $vars["rows"] = array($root_object => $objects);
-  //_views_json_debug_stop($vars["rows"], "template preprocess simple");
 }
 
 function template_preprocess_views_views_json_style_exhibit(&$vars) {	
@@ -56,26 +69,39 @@ function template_preprocess_views_views_json_style_exhibit(&$vars) {
   $options = $vars["options"];
   $base = $view->base_table;
   $root_object = "Items";
+  $top_child_object = $options["top_child_object"];
   $plaintext_output = $options["plaintext_output"];	
 	$objects = array();
   foreach($rows as $row) {
-  	$object = array();
+    	$object = array($top_child_object => array());
   	/*Convert the $rows into a hierachial key=>value array*/
   	foreach ($row as $field) {
   	  if ($options["field_output"] == "normal") {
   	  	if ($field->label)
-  	  	  $label = $plaintext_output ? check_plain(strip_tags($field->label)) : $field->label;
-  	  	else $label = $plaintext_output ?  check_plain(strip_tags($field->id)) : $field->id;
-  	  	$content = $plaintext_output ?  check_plain(strip_tags($field->content)) : $field->content;
+  	  	  $label = $plaintext_output ? strip_tags($field->label) : $field->label;
+  	  	else $label = $plaintext_output ? strip_tags($field->id) : $field->id;  
+        if (!$field->is_multiple) {   	  	
+  	  	  $content = $plaintext_output ? strip_tags($field->content) : $field->content;
+        }
+        else {
+        	$content = array();
+        	foreach($field->content as $n=>$oc) $content[$n] = ($plaintext_output ? strip_tags($oc) : $oc);
+        }
   	  }
   	  elseif ($options["field_output"] == "raw") {
-  	  	$label = $plaintext_output ?  check_plain(strip_tags($field->id)) : $field->id;
-  	  	$content = $plaintext_output ?  check_plain(strip_tags($field->raw)) : $field->raw;
-  	  }
-  	  $object[$label] = $content;	
+  	  	$label = $plaintext_output ? strip_tags($field->id) : $field->id;
+  	    if (!$field->is_multiple) {   	  	
+  	  	  $content = $plaintext_output ? strip_tags($field->raw) : $field->raw;
+        }
+        else {
+        	$content = array();
+        	foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? strip_tags($oc) : $oc;
+        }
+  	  }	
+  	  $object[$top_child_object][$label] = $content;
   	}
   	if (!array_key_exists("label", $object)) $object["label"] = "Item";
-    if (!array_key_exists("type", $object)) $object["type"] = $base;
+    if (!array_key_exists("type", $object)) $object["type"] = $top_child_object;
     $objects[] = $object;
   }	
   $vars["rows"] = array($root_object => $objects); 

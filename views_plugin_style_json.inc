@@ -17,6 +17,7 @@ class views_plugin_style_json extends views_plugin_style {
   	function option_definition() {
       $options = parent::option_definition();
       $options['root_object'] = array('default' => 'nodes', 'translatable' => TRUE);
+      $options['top_child_object'] = array('default' => 'node', 'translatable' => TRUE);
       $options['field_output'] = array('default' => 'normal', 'translatable' => TRUE);
       $options['plaintext_output'] = array('default' => TRUE, 'translatable' => TRUE);
       $options['format'] = array('default' => 'simple', 'translatable' => TRUE);
@@ -38,9 +39,14 @@ class views_plugin_style_json extends views_plugin_style {
     '#default_value' => $this->options['root_object'],
     '#description' => t('The name of the root object in the JSON document. e.g nodes or users or forum_posts'),
       //'#process' => array('views_process_dependency'),
-      //'#dependency' => array('radios:schema' => array('raw')),
-      
+      //'#dependency' => array('radios:schema' => array('raw')),      
     );
+  	$form['top_child_object'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Top-level child object'),
+    '#default_value' => $this->options['top_child_object'],
+    '#description' => t('The name of each top-level child object in the JSON document. e.g node or user or forum_post'),
+    );    
   	$form['field_output']  = array(
       '#type' => 'radios',
       '#title' => 'Field output',
@@ -68,9 +74,9 @@ class views_plugin_style_json extends views_plugin_style {
       '#type'           => 'radios',
       '#title'          => t('Content-Type'),
       '#options'        => array(
-        'text/json'  => t('text/json'),
-        'application/json' => t('application/json'),
-        ),
+        'default'       => t("Default: application/json"),
+        'text/json'     => t('text/json'),
+       ),
       '#default_value'  => $this->options['content_type'],
       '#description'    => t('The Content-Type header that will be sent with the JSON output.')
     );
