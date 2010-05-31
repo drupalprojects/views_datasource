@@ -21,7 +21,7 @@ class views_plugin_style_rdf extends views_plugin_style {
     $options['vocabulary'] = array('default' => 'foaf', 'translatable' => TRUE);
     $options['field_output'] = array('default' => 'normal', 'translatable' => TRUE);
     $options['plaintext_output'] = array('default' => TRUE, 'translatable' => TRUE);
-    $options['escape_as_CDATA'] = array('default' => 'yes', 'translatable' => TRUE);
+    $options['escape_as_CDATA'] = array('default' => 'no', 'translatable' => TRUE);
     $options['content_type'] = array('default' => 'text/xml', 'translatable' => FALSE);
     $options['header'] = array('default' => NULL, 'translatable' => FALSE);
     $options['author'] = array('default' => $user->name, 'translatable' => FALSE);

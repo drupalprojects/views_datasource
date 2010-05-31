@@ -64,11 +64,23 @@ function template_preprocess_views_views_rdf_style_foaf(&$vars) {
   	  	if ($field->label)
   	  	  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
   	  	else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	$content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+  	  	if (!$field->is_multiple) 
+		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+		    else {		    	
+		    	$content = array();
+		    	foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+		    	$content = implode(" ", $content);
+		    }  	  	    	  	  
   	  }
   	  elseif ($options["field_output"] == "raw") {
   	  	$label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	$content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->raw))) : $field->raw;
+  	    if (!$field->is_multiple) 
+		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
+		    else { 
+		      $content = array();
+		      foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+		      $content = implode(" ", $content);
+		    }  	  	  	  
   	  }
   	  //if (($options["skip_empty_fields"] == TRUE) && (is_null($content) || $content === "")) continue;  	  
   	  if (stripos($label, 'firstname') !== FALSE) {
@@ -197,11 +209,23 @@ function template_preprocess_views_views_rdf_style_sioc(&$vars) {
   	  	  if ($field->label)
   	  	    $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
   	  	  else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	  $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+  	  	  if (!$field->is_multiple) 
+		        $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+		      else {		    	
+		    	  $content = array();
+		    	  foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+		    	  $content = implode(" ", $content);
+		      }  
   	    }
   	    elseif ($options["field_output"] == "raw") {
   	  	  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	  $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->raw))) : $field->raw;
+  	      if (!$field->is_multiple) 
+		        $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
+		      else { 
+		        $content = array();
+		        foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+		        $content = implode(" ", $content);
+		      }  	
   	    }
   		  if ((drupal_strtolower($label) == 'id') || (drupal_strtolower($label) == 'uid') && (!array_key_exists("uid", $user))) {
           $user["uid"] = $content;
@@ -411,7 +435,7 @@ function _views_rdf_sioc_xml_user_render($user) {
 }
 
 function _views_rdf_sioc_xml_story_render($nid, $title, $type, $created, $changed, $last_updated, $uid, $body) {
-	$node_url = url($nid, array('absolute' => TRUE));
+	$node_url = url("node/$nid", array('absolute' => TRUE));
 	$xml = "";
   $xml .= "<sioc:Post rdf:about=\"$node_url\">\n";
   $xml .= "  <dc:title>$title</dc:title>\n";

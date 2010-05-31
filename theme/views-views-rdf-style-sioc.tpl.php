@@ -90,10 +90,11 @@ if ($users) {
  		  	$users_done[$node["uid"]] = $user;
  		  	$users_xml .=  _views_rdf_sioc_xml_user_render($user);
  		  }
-      $type = drupal_strtolower($node["type"]);
- 		  if (($type == 'page') || ($type == 'story') || ($type == 'forum') || ($type == 'blog')) {
-        $nodes_xml .= _views_rdf_sioc_xml_story_render($node["id"], $node["title"], $node["type"], $node["created"], $node["changed"], $node["last_updated"], $node["uid"], $node["body"]);
-      }
+      $nodes_xml .= _views_rdf_sioc_xml_story_render($node["id"], $node["title"], $node["type"], $node["created"], $node["changed"], $node["last_updated"], $node["uid"], $node["body"]); 		  
+//      $type = drupal_strtolower($node["type"]);
+// 		  if (($type == 'page') || ($type == 'story') || ($type == 'forum') || ($type == 'blog')) {
+//        $nodes_xml .= _views_rdf_sioc_xml_story_render($node["id"], $node["title"], $node["type"], $node["created"], $node["changed"], $node["last_updated"], $node["uid"], $node["body"]);
+//      }
     }
     else {
       if ($view->override_path)

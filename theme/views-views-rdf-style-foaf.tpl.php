@@ -5,7 +5,7 @@
  * Default template for the Views RDF style plugin using the FOAF vocabulary
  *
  * - $view: The View object.
- * - $rows: Array of row objects as rendered by _views_xml_render_fields
+ * - $rows: Array of row objects as rendered by _views_rdf_render_fields
  * - $persons Array of person objects as created by template_preprocess_views_views_rdf_style_foaf 
  *
  * @ingroup views_templates
@@ -29,15 +29,14 @@ else {
 foreach($persons as $person) {
  	$xml .= "<foaf:Person>\n";
  	if (array_key_exists("name", $person))              $xml .= "  <foaf:name>".$person["name"]."</foaf:name>\n";
- 	if (array_key_exists("firstname", $person))         $xml .= "  <foaf:firstName>".$person["firstname"]."</foaf:firstName>\n";
- 	if (array_key_exists("surname", $person))           $xml .= "  <foaf:surName>".$person["surname"]."</foaf:surName>\n";
- 	if (array_key_exists("surname", $person))           $xml .= "  <foaf:surName>".$person["surname"]."</foaf:surName>\n";
+ 	if (array_key_exists("firstName", $person))         $xml .= "  <foaf:firstName>".$person["firstName"]."</foaf:firstName>\n";
+ 	if (array_key_exists("surName", $person))           $xml .= "  <foaf:surName>".$person["surName"]."</foaf:surName>\n";
  	if (array_key_exists("title", $person))             $xml .= "  <foaf:title>".$person["title"]."</foaf:title>\n";
  	if (array_key_exists("nick", $person))              $xml .= "  <foaf:nick>".$person["nick"]."</foaf:nick>\n";
  	if (array_key_exists("mbox", $person))              $xml .= "  <foaf:mbox rdf:resource=\"mailto:".$person["mbox"]."\">".$person["mbox"]."</foaf:mbox>\n";
  	if (array_key_exists("mbox_sha1sum", $person))      $xml .= "  <foaf:mbox_sha1sum>".$person["mbox_sha1sum"]."</foaf:mbox_sha1sum>\n";
  	if (array_key_exists("openid", $person))            $xml .= "  <foaf:openid>".$person["openid"]."</foaf:openid>\n";
- 	if (array_key_exists("workplacehomepage", $person)) $xml .= "  <foaf:workplaceHomepage rdf:resource=\"".$person["workplacehomepage"]."\">".$person["workplacehomepage"]."</foaf:workplaceHomepage>\n";
+ 	if (array_key_exists("workplaceHomepage", $person)) $xml .= "  <foaf:workplaceHomepage rdf:resource=\"".$person["workplaceHomepage"]."\">".$person["workplacehomepage"]."</foaf:workplaceHomepage>\n";
  	if (array_key_exists("homepage", $person))          $xml .= "  <foaf:homepage rdf:resource=\"".$person["homepage"]."\">".$person["homepage"]."</foaf:homepage>\n";
  	if (array_key_exists("weblog", $person))            $xml .= "  <foaf:weblog rdf:resource=\"".$person["weblog"]."\">".$person["weblog"]."</foaf:weblog>\n";
  	if (array_key_exists("img", $person))               $xml .= "  <foaf:img rdf:resource=\"".$person["img"]."\">".$person["img"]."</foaf:img>\n";
