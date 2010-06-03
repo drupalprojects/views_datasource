@@ -14,13 +14,13 @@ class views_plugin_style_xhtml extends views_plugin_style {
   /**
    * Set default options
    */
-  function options(&$options) {
+  function option_definition() {
     $options = parent::option_definition();
     $options['format'] = array('default' => 'hcard', 'translatable' => TRUE);
     $options['field_output'] = array('default' => 'normal', 'translatable' => TRUE);
     $options['plaintext_output'] = array('default' => TRUE, 'translatable' => TRUE);
     /*$options['skip_empty_fields'] = array('default' => TRUE, 'translatable' => TRUE);*/
-    $options['escape_as_CDATA'] = array('default' => 'yes', 'translatable' => TRUE);
+    $options['escape_as_CDATA'] = array('default' => 'no', 'translatable' => TRUE);
     $options['content_type'] = array('default' => 'text/xhtml', 'translatable' => FALSE);
     $options['header'] = array('default' => NULL, 'translatable' => FALSE);
     $options['author'] = array('default' => $user->name, 'translatable' => FALSE);

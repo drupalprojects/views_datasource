@@ -87,11 +87,23 @@ function template_preprocess_views_views_xhtml_style_hcard(&$vars) {
   	  	if ($field->label)
   	  	  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
   	  	else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	$content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+  	  	if (!$field->is_multiple) 
+		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+		    else {		    	
+		    	$content = array();
+		    	foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+		    	$content = implode(" ", $content);
+		    }  	  	    	  	    	  	
   	  }
   	  elseif ($options["field_output"] == "raw") {
   	  	$label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	$content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->raw))) : $field->raw;
+  	    if (!$field->is_multiple) 
+		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
+		    else { 
+		      $content = array();
+		      foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+		      $content = implode(" ", $content);
+		    }  	  	  	    	  	
   	  }
   	  $label = _views_xml_strip_illegal_xml_name_chars(html_entity_decode(check_plain(strip_tags($label))));
   	  $content = (($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>": $content);
@@ -174,7 +186,6 @@ function template_preprocess_views_views_xhtml_style_hcard(&$vars) {
       }	
   	} $hcards[] = $hcard;
   }//for
-  //_views_xml_debug_stop($hcards);
   $vars["hcards"] = $hcards;  
 }
 
@@ -208,11 +219,23 @@ function template_preprocess_views_views_xhtml_style_hcalendar(&$vars) {
   	  	if ($field->label)
   	  	  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
   	  	else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	$content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+  	    if (!$field->is_multiple) 
+		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+		    else {		    	
+		    	$content = array();
+		    	foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+		    	$content = implode(" ", $content);
+		    }  	  	    	  	    	  	
   	  }
   	  elseif ($options["field_output"] == "raw") {
   	  	$label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	$content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->raw))) : $field->raw;
+  	    if (!$field->is_multiple) 
+		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
+		    else { 
+		      $content = array();
+		      foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+		      $content = implode(" ", $content);
+		    }  	  	  	    	  	  	  	
   	  }
   	  $label = _views_xml_strip_illegal_xml_name_chars(html_entity_decode(check_plain(strip_tags($label))));
   	  $content = (($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>": $content);  	
