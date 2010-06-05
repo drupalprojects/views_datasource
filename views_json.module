@@ -153,6 +153,24 @@ function _views_json_render_fields(&$view, $row) {
       $field_output = $view->field[$field->options['id']]->advanced_render($row);
       $field_raw = (isset($view->field[$id]->field_alias) && isset($row->{$view->field[$id]->field_alias})) ? $row->{$view->field[$id]->field_alias} : NULL;
     }
+    
+    $img_match = array();
+    $src_match = array();
+    if (is_array($field_output)) {
+      foreach ($field_output as $i=>$f) {
+        if (preg_match("/<img[^>]+>/i", $f, $img_match)) {
+    	    if (preg_match('/(alt|title|src)=("[^"]*")/i', $img_match[0], $src_match))
+    	    $field_output[$i] = ($src_match[2]);
+        }      	
+      }        	
+    }
+    else {
+      if (preg_match("/<img[^>]+>/i", $field_output, $img_match)) {
+    	  if (preg_match('/(alt|title|src)=("[^"]*")/i', $img_match[0], $src_match))
+    	    $field_output = ($src_match[2]);
+      }      	    	
+    }
+    
     if (empty($field->options['exclude']) && ($field_output != "") && !empty($field_output)) {
     	$object = new stdClass();      
       $object->id = $id;

@@ -31,10 +31,10 @@ function theme_views_views_xml_style(&$view, $rows = array(), $attachment = NULL
 function template_preprocess_views_views_xml_style_raw(&$vars) {
 	$view = &$vars["view"];
   $rows = &$vars["rows"];
-  
   $options = &$vars["options"];  
   $base = $view->base_table;
   $root = $options['root_element'];
+  $top_child_object = $options["top_child_object"];  
   $plaintext_output = $options["plaintext_output"];
   $content_type = ($options['content_type'] == 'default') ? 'text/xml' : $options['content_type'];
   $header = $options['header'];
@@ -42,7 +42,7 @@ function template_preprocess_views_views_xml_style_raw(&$vars) {
   if ($header) $xml.= $header."\n"; 
 	$xml .= "<$root>\n";
   foreach($rows as $row) {
-		$xml .= ($options['element_output'] == 'nested') ? "  <$base>\n": "  <$base\n";
+		$xml .= ($options['element_output'] == 'nested') ? "  <$top_child_object>\n": "  <$top_child_object\n";
 	  foreach($row as $id => $object) {
 		  if ($options['field_output'] == 'normal')  {
 		    if ($object->label) 
@@ -58,7 +58,7 @@ function template_preprocess_views_views_xml_style_raw(&$vars) {
 		    }		    
 		  }
 		  elseif ($options['field_output'] == 'raw') {
-		    $label = _views_xml_strip_illegal_xml_name_chars(check_plain(html_entity_decode(strip_tags($id))));
+		   $label = _views_xml_strip_illegal_xml_name_chars(check_plain(html_entity_decode(strip_tags($id))));
 		   if (!$object->is_multiple) 
 		      $content = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($object->raw))) : $object->raw);
 		    else {
@@ -66,10 +66,9 @@ function template_preprocess_views_views_xml_style_raw(&$vars) {
 		    }
 		  }
 		  
-		  if ($options['element_output'] == 'nested') {
-		  	
+		  if ($options['element_output'] == 'nested') {		  	
 			  if (!is_array($content)) {
-			  	$xml .= "      <$label>".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>\n": $content."</$label>\n");
+			  	$xml .= "      <$label>".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>\n": $content)."</$label>\n";
 			  	//_views_xml_debug_stop($xml);
 			  }
 			  else {
@@ -83,7 +82,6 @@ function template_preprocess_views_views_xml_style_raw(&$vars) {
 		  elseif($options['element_output'] == 'attributes') {
 		  	if (!is_array($content)) {
           $content = _views_xml_strip_illegal_xml_attribute_value_chars($content);
-          $label = _views_xml_strip_illegal_xml_name_chars($label);
 		      $xml .= " $label=\"$content\" ";
 		  	}
 		  	else {
@@ -96,7 +94,7 @@ function template_preprocess_views_views_xml_style_raw(&$vars) {
 		  }
 	  }
 
-	  $xml .= ($options['element_output'] == 'nested') ? "  </$base>\n": "/>\n";
+	  $xml .= ($options['element_output'] == 'nested') ? "  </$top_child_object>\n": "/>\n";
 	}
 	$xml .= "</$root>\n";
 	$vars["xml"] = $xml;
@@ -109,6 +107,7 @@ function template_preprocess_views_views_xml_style_opml(&$vars) {
   $rows = &$vars["rows"];
   $options = &$vars["options"];
 	$base = $view->base_table;
+	$top_child_object = $options["top_child_object"];
   $root = "opml";;
   $plaintext_output = $options["plaintext_output"];
   $vars["content_type"] = ($options['content_type'] == 'default') ? 'text/html' : $options['content_type'];
@@ -271,14 +270,12 @@ function template_preprocess_views_views_xml_style_atom(&$vars) {
   	  }  	  
   	  elseif ($options["field_output"] == "raw") {
   	  	$label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	$content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->raw))) : $field->raw;
   	    if (!$field->is_multiple) 
 		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
 		    else { 
 		      $content = array();
 		      foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
-		    }  	  	
-  	  	
+		    }  	  	  	  
   	  }
   	  $label = _views_xml_strip_illegal_xml_name_chars(html_entity_decode(check_plain(strip_tags($label))));  	  
   	  //if (($options["skip_empty_fields"] == TRUE) && (is_null($content) || $content === "")) continue;

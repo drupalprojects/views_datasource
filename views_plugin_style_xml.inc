@@ -20,6 +20,7 @@ class views_plugin_style_xml extends views_plugin_style {
     $options = parent::option_definition();
     $options['schema'] = array('default' => 'raw', 'translatable' => TRUE);
     $options['root_element'] = array('default' => 'node', 'translatable' => TRUE);
+    $options['top_child_object'] = array('default' => 'node', 'translatable' => TRUE);
     $options['field_output'] = array('default' => 'normal', 'translatable' => TRUE);
     $options['plaintext_output'] = array('default' => TRUE, 'translatable' => TRUE);
     /*$options['skip_empty_fields'] = array('default' => TRUE, 'translatable' => TRUE);*/
@@ -51,10 +52,16 @@ class views_plugin_style_xml extends views_plugin_style {
       '#type' => 'textfield',
       '#title' => t('Root element name'),
       '#default_value' => $this->options['root_element'],
-      '#description' => t('The name of the root element in the XML document.'),
+      '#description' => t('The name of the root element in a raw XML document.'),
       //'#process' => array('views_process_dependency'),
       //'#dependency' => array('edit-style-options-schema' => array('raw')),  
-    ); 
+    );
+  	$form['top_child_object'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Top-level child element name'),
+    '#default_value' => $this->options['top_child_object'],
+    '#description' => t('The name of each top-level child object in a raw XML document. e.g node or user or forum_post'),
+    );       
    $form['field_output']  = array(
       '#type' => 'radios',
       '#title' => 'Field output',
@@ -78,7 +85,7 @@ class views_plugin_style_xml extends views_plugin_style {
     $form['element_output']  = array(
       '#type' => 'radios',
       '#title' => 'Element output',
-      '#description' => 'For each row in the view, fields can be output as either nested XML child elements, or attributes of the XML element.',
+      '#description' => 'For each row in the view, fields can be output as either nested XML child elements, or attributes of the raw XML element.',
       '#options' => array('nested' => t('Nested'), 'attributes' => t('Attributes')),
       '#default_value' => $this->options['element_output'],
     );

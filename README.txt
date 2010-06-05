@@ -3,6 +3,14 @@ $Id$
 Views Datasource README
 -------------------------------------------------------------------------------
 
+
+proper dates for each format
+t() in options
+references using &
+check for separator in profile fields
+properly handle multiple values grouped
+Atom encoding issue
+
 Current Version
 ---------------
 6.x-1.0-BETA1
@@ -102,7 +110,7 @@ FOAF (http://xmlns.com/foaf/spec/) or hCard
 (http://microformats.org/wiki/hcard-cheatsheet) spec. However any node type 
 (like those created with nodeprofile or Bio or Advanced Profile or Content
 Profile) can be used in the view. It doesn't matter what data table the view
-is base on, only what fields are exposed.
+is based on, only what fields are present in the view.
    
 OPTIONS
 ------
@@ -241,7 +249,7 @@ The views_xhtml plugin has the following options:
      honorific prefix, Given name, Additional name, Family name, Honoric suffix,
      Nickname, Organization name, Organization unit, photo, tel.
      
-     The following fields are 
+     The following fields are recognized by hCalendar:
      class, category, description, summary, dtstart(Event start, event_start)
      dtend(Event end, event_end).
      
