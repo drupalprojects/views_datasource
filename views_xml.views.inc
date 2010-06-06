@@ -19,9 +19,9 @@ function views_xml_views_plugins() {
 	   'module' => 'views_xml',
       'style'   => array(                 // declare the views_xml_* style plugins
         'views_xml_style' => array(
-          'title'           => t('XML data document'),
+          'title'           => ('XML data document'),
 	        'path'            => $path,
-          'help'            => t('Display a view as an XML document.'),
+          'help'            => ('Display a view as an XML document.'),
           'handler'         => 'views_plugin_style_xml',
 	        'theme'           => 'views_views_xml_style',
 	        'theme file'      => 'views_views_xml_style.theme.inc',

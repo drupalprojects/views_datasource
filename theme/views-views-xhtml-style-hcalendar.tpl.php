@@ -52,8 +52,8 @@
       if ($latitude || $longitude) {
         $xhtml .= "  <div class=\"geo\">\n";
         if ($location) $xhtml  .= "    $location: \n";
-        if ($latitude) $xhtml  .= "    <span class=\"latitude\">$latitude</span>\n; ";
-        if ($longitude) $xhtml .= "    <span class=\"longitude\">$longitude</span>";
+        if ($latitude) $xhtml  .= "    <span class=\"latitude\">$latitude</span>\n";
+        if ($longitude) $xhtml .= "    <span class=\"longitude\">$longitude</span>\n";
         $xhtml .= "  </div>\n";
       }
     }

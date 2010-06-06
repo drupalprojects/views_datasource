@@ -228,7 +228,7 @@ function _views_xhtml_strip_illegal_xml_name_chars($input) {
 function _views_xhtml_format_author($username) {
 	$author = array();
 	if (!$username) {
-		$author["name"] = variable_get('anonymous', t('Anonymous'));
+		$author["name"] = variable_get('anonymous', ('Anonymous'));
 		$author["email"] = variable_get('site_mail', 'none@none.info');
 		return $author;
 	}
@@ -237,8 +237,8 @@ function _views_xhtml_format_author($username) {
 	}
 	else $user = user_load(array('name'=>$username));
 	if (!$user) {
-		//$author["name"] = variable_get('anonymous', t('Anonymous'));
-		//$author["name"] = variable_get('anonymous', t('Anonymous'));
+		//$author["name"] = variable_get('anonymous', ('Anonymous'));
+		//$author["name"] = variable_get('anonymous', ('Anonymous'));
 		$author["name"] = $username;
 		$author["email"] = variable_get('site_mail', 'none@none.info');
 		return $author;

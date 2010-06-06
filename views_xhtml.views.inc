@@ -19,9 +19,9 @@ function views_xhtml_views_plugins() {
     'module'  => views_xhtml,
     'style'   => array(                 // declare the views_xhtml style plugin
       'views_xhtml' => array(
-        'title'           => t('XHTML data document'),
+        'title'           => ('XHTML data document'),
         'path'            => $path,
-        'help'            => t('Displays nodes as XHTML microformats.'),
+        'help'            => ('Displays nodes as XHTML microformats.'),
         'handler'         => 'views_plugin_style_xhtml',
         'theme'           => 'views_views_xhtml_style',
 	      'theme file'      => 'views_views_xhtml_style.theme.inc',

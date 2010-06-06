@@ -19,9 +19,9 @@ function views_rdf_views_plugins() {
     'module'  => 'views_rdf',
     'style'   => array(                 // declare the views_rdf style plugin
       'views_rdf' => array(
-        'title'           => t('RDF data document'),
+        'title'           => ('RDF data document'),
         'path'            => $path,
-        'help'            => t('Displays nodes in a view using the RDF data format.'),
+        'help'            => ('Displays nodes in a view using the RDF data format.'),
         'handler'         => 'views_plugin_style_rdf',
         'theme'           => 'views_views_rdf_style',
   	    'theme file'      => 'views_views_rdf_style.theme.inc',

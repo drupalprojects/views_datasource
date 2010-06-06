@@ -19,9 +19,9 @@ function views_json_views_plugins() {
     'module'  => 'views_json',
       'style'   => array(                 // Declare the views_json style plugin.
         'views_json'      => array(
-          'title'         => t('JSON data document'),
+          'title'         => ('JSON data document'),
 	        'path'          => $path,
-	        'help'          => t('Displays nodes in the JSON data format.'), 
+	        'help'          => ('Displays nodes in the JSON data format.'), 
           'handler'         => 'views_plugin_style_json',
 		      'theme'           => 'views_views_json_style',
 	        'theme file'      => 'views_views_json_style.theme.inc',

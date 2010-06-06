@@ -16,16 +16,16 @@ class views_plugin_style_xhtml extends views_plugin_style {
    */
   function option_definition() {
     $options = parent::option_definition();
-    $options['format'] = array('default' => 'hcard', 'translatable' => TRUE);
-    $options['field_output'] = array('default' => 'normal', 'translatable' => TRUE);
-    $options['plaintext_output'] = array('default' => TRUE, 'translatable' => TRUE);
-    /*$options['skip_empty_fields'] = array('default' => TRUE, 'translatable' => TRUE);*/
-    $options['escape_as_CDATA'] = array('default' => 'no', 'translatable' => TRUE);
+    $options['format'] = array('default' => 'hcard', 'translatable' => FALSE);
+    $options['field_output'] = array('default' => 'normal', 'translatable' => FALSE);
+    $options['plaintext_output'] = array('default' => TRUE, 'translatable' => FALSE);
+    /*$options['skip_empty_fields'] = array('default' => TRUE, 'translatable' => FALSE);*/
+    $options['escape_as_CDATA'] = array('default' => 'no', 'translatable' => FALSE);
     $options['content_type'] = array('default' => 'text/xhtml', 'translatable' => FALSE);
     $options['header'] = array('default' => NULL, 'translatable' => FALSE);
     $options['author'] = array('default' => $user->name, 'translatable' => FALSE);
-    $options['using_views_api_mode'] = array('default' => FALSE, 'translatable' => TRUE);
-    //$options['action_on_missing_field'] = array('default' => 'none', 'translatable' => TRUE);
+    $options['using_views_api_mode'] = array('default' => FALSE, 'translatable' => FALSE);
+    //$options['action_on_missing_field'] = array('default' => 'none', 'translatable' => FALSE);
     return $options;
   }
 
@@ -38,35 +38,35 @@ class views_plugin_style_xhtml extends views_plugin_style {
   function options_form(&$form, &$form_state) {
     $form['format'] = array(
       '#type' => 'radios',
-      '#title' => t('Microformat'),
-      '#options' => array('hcard' => t('hCard'), 'hcalendar' => t('hCalendar')),
+      '#title' => ('Microformat'),
+      '#options' => array('hcard' => ('hCard'), 'hcalendar' => ('hCalendar')),
       '#default_value' => $this->options['format'],
     );
    $form['field_output']  = array(
       '#type' => 'radios',
       '#title' => 'Field output',
       '#description' => 'For each row in the view, fields can be output as either the field rendered by Views, or by the raw content of the field.',  
-      '#options' => array('normal' => t('Normal'), 'raw' => t('Raw')),
+      '#options' => array('normal' => ('Normal'), 'raw' => ('Raw')),
       '#default_value' => $this->options['field_output'],
     );
     $form['plaintext_output'] = array(
       '#type'           => 'checkbox',
-      '#title'          => t('Plaintext output'),
+      '#title'          => ('Plaintext output'),
       '#default_value'  => $this->options['plaintext_output'],
-      '#description'    => t('For each row in the view, strip all markup from the field output.'),
+      '#description'    => ('For each row in the view, strip all markup from the field output.'),
     );
     /*
     $form['skip_empty_fields'] = array(
       '#type'           => 'checkbox',
-      '#title'          => t('Skip adding fields that are empty.'),
+      '#title'          => ('Skip adding fields that are empty.'),
       '#default_value'  => $this->options['skip_empty_fields'],
-      '#description'    => t('For each row in the view, skip adding a field if the field value is NULL or blank.'),
+      '#description'    => ('For each row in the view, skip adding a field if the field value is NULL or blank.'),
     );*/    
     $form['escape_as_CDATA']  = array(
       '#type' => 'radios',
       '#title' => 'Escape row content as CDATA',
       '#description' => 'For each row in the view, escape the row field content as XML CDATA sections.',
-      '#options' => array('yes' => t('Yes'), 'no' => t('No')),
+      '#options' => array('yes' => ('Yes'), 'no' => ('No')),
       '#default_value' => $this->options['escape_as_CDATA'],
       //'#process' => array('views_process_dependency'),
       //'#dependency' => array('edit-style-options-element-output-options' => array('nested')),
@@ -79,14 +79,14 @@ class views_plugin_style_xhtml extends views_plugin_style {
       );
     $form['content_type'] = array(
       '#type'           => 'radios',
-      '#title'          => t('Content-Type'),
+      '#title'          => ('Content-Type'),
       '#options'        => array(
-         'default'      => t("Default: text/xhtml"),  
+         'default'      => ("Default: text/xhtml"),  
          'text/xml'     => 'text/xml',
          'text/html'    => 'text/html',
        ),
       '#default_value'  => $this->options['content_type'],
-      '#description'    => t('The Content-Type header that will be sent with the XHTML output.')
+      '#description'    => ('The Content-Type header that will be sent with the XHTML output.')
     );
     $form['author'] = array (
       '#type' => 'textfield',
@@ -96,9 +96,9 @@ class views_plugin_style_xhtml extends views_plugin_style {
       );     
     $form['using_views_api_mode'] = array(
       '#type'           => 'checkbox',
-      '#title'          => t('Views API mode'),
+      '#title'          => ('Views API mode'),
       '#default_value'  => $this->options['using_views_api_mode'],
-      '#description'    => t('Not using View API mode means the JSON gets output directly and the server ceases normal page processing.  Using it means the server does not cease processing after outputting the JSON.  This allows the Views API to be used with the view without having to prematurely terminate page processing.'),
+      '#description'    => ('Not using View API mode means the JSON gets output directly and the server ceases normal page processing.  Using it means the server does not cease processing after outputting the JSON.  This allows the Views API to be used with the view without having to prematurely terminate page processing.'),
     );    
   }
   
