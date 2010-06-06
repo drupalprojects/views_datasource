@@ -43,10 +43,10 @@ foreach($entries as $entry) {
     if (array_key_exists("link", $entry)) $link = $entry["link"];
     if (array_key_exists("teaser", $entry)) $teaser = $entry["teaser"];
     if (array_key_exists("content", $entry)) $content = $entry["content"];
-    $xml .= "  <entry>\n    <id>$id</id>\n    <title>$title</title>\n    <updated>$updated</updated>\n";  //put required elements first
+    $xml .= "  <entry>\n    <id>$id</id>\n    <title>".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$title]]>": "$title")."</title>\n    <updated>$updated</updated>\n";  //put required elements first
     if ($link) $xml .= "    <link href=\"$link\"/>\n";
-    if ($teaser) $xml .= "    <teaser>$teaser</teaser>\n";
-    if ($content) $xml .= "    <content>$content</content>\n";
+    if ($teaser) $xml .= "    <teaser>".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$teaser]]>": "$teaser")."</teaser>\n";
+    if ($content) $xml .= "    <content>".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>": "$content")."</content>\n";
     if (array_key_exists("author", $entry)) {
     	$author_name = $entry["author"]["name"]; if (array_key_exists("email", $entry["author"])) $author_email = $entry["author"]["email"];
     	$xml .= "    <author>\n      <name>$author_name</name>\n";      
