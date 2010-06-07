@@ -4,6 +4,7 @@
  * @file views-views-rdf-style-sioc.tpl.php
  * Default template for the Views RDF style plugin using the SIOC vocabulary
  *
+ * Variables:
  * - $view: The View object.
  * - $rows: Array of row objects as rendered by _views_xml_render_fields
  * - $nodes, $users Array of user and node objects created by template_preprocess_views_views_rdf_style_sioc 

@@ -4,6 +4,7 @@
  * @file views-views-xml-style-atom.tpl.php
  * Default template for the Views XML style plugin using the Atom schema
  *
+ * Variables
  * - $view: The View object.
  * - $rows: Array of row objects as rendered by _views_xml_render_fields
  * - $entries Array of Atom entries as created by template_preprocess_views_views_xml_style_atom 

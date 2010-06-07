@@ -142,11 +142,11 @@ function _views_xml_render_multiple_field($field, $values) {
  * @return array
  *   Object containing all the raw and rendered fields  
  */
-function _views_xml_render_fields(&$view, $row) {
+function _views_xml_render_fields($view, $row) {
   $field_ids = array_keys($view->field);
   $rendered_fields = array();
   foreach ($field_ids as $id) {  
-  	$field = &$view->field[$id];
+  	$field = $view->field[$id];
     $field_is_multiple = FALSE;
     $field_raw = array();
     if ((isset($field->options['multiple']['group']))&& isset($field->field_values)) {    	
@@ -170,14 +170,14 @@ function _views_xml_render_fields(&$view, $row) {
     if (is_array($field_output)) {
       foreach ($field_output as $i=>$f) {
         if (preg_match("/<img[^>]+>/i", $f, $img_match)) {
-    	    if (preg_match('/(src)=("[^"]*")/i', $img_match[0], $src_match))
+    	    if (preg_match('/(src)="([^"]*)"/i', $img_match[0], $src_match))
     	    $field_output[$i] = ($src_match[2]);
         }      	
       }        	
     }
     else {
       if (preg_match("/<img[^>]+>/i", $field_output, $img_match)) {
-    	  if (preg_match('/(alt|title|src)=("[^"]*")/i', $img_match[0], $src_match))
+    	  if (preg_match('/(src)="([^"]*)"/i', $img_match[0], $src_match))
     	    $field_output = ($src_match[2]);
       }      	    	
     }

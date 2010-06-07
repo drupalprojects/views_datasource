@@ -4,6 +4,7 @@
  * @file views-views-xml-style-raw.tpl.php
  * Default template for the Views XML style plugin using the raw schema
  *
+ * Variables
  * - $view: The View object.
  * - $rows: Array of row objects as rendered by _views_xml_render_fields 
  *

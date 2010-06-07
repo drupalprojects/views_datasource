@@ -4,6 +4,7 @@
  * @file views-views-xhtml-style-hcard.tpl.php
  * Default template for the Views XHTML style plugin using the hCard format
  *
+ * Variables:
  * - $view: The View object.
  * - $rows: Array of row objects as rendered by _views_xml_render_fields
  * - $hcards Array of hcard arrays as created by template_preprocess_views_views_xhtml_style_hcard 

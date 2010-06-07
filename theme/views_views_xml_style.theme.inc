@@ -22,16 +22,16 @@
  * @param $options
  * @return unknown_type
  */
-function theme_views_views_xml_style(&$view, $rows = array(), $attachment = NULL, $options = array()) {
+function theme_views_views_xml_style($view, $rows = array(), $attachment = NULL, $options = array()) {
 	if ($options['schema'] == 'raw') return theme('views_views_xml_style_raw', $view, $rows, $attachment, $options);
 	if ($options['schema'] == 'opml') return theme('views_views_xml_style_opml', $view, $rows, $attachment, $options);
 	if ($options['schema'] == 'atom') return theme('views_views_xml_style_atom', $view, $rows, $attachment, $options);
 }
 
-function template_preprocess_views_views_xml_style_raw(&$vars) {
-	$view = &$vars["view"];
-  $rows = &$vars["rows"];
-  $options = &$vars["options"];  
+function template_preprocess_views_views_xml_style_raw($vars) {
+	$view = $vars["view"];
+  $rows = $vars["rows"];
+  $options = $vars["options"];  
   $base = $view->base_table;
   $root = $options['root_element'];
   $top_child_object = $options["top_child_object"];  
@@ -100,12 +100,12 @@ function template_preprocess_views_views_xml_style_raw(&$vars) {
 	$vars["xml"] = $xml;
 }
 
-function template_preprocess_views_views_xml_style_opml(&$vars) {
+function template_preprocess_views_views_xml_style_opml($vars) {
 	global $user;
 	global $base_url; 
-	$view = &$vars["view"];
-  $rows = &$vars["rows"];
-  $options = &$vars["options"];
+	$view = $vars["view"];
+  $rows = $vars["rows"];
+  $options = $vars["options"];
 	$base = $view->base_table;
 	$top_child_object = $options["top_child_object"];
   $root = "opml";;
@@ -230,12 +230,12 @@ function template_preprocess_views_views_xml_style_opml(&$vars) {
  * @param $vars
  * @return unknown_type
  */
-function template_preprocess_views_views_xml_style_atom(&$vars) {
+function template_preprocess_views_views_xml_style_atom($vars) {
 	global $user;
 	global $base_url; 
-  $view = &$vars["view"];
-  $rows = &$vars["rows"];
-  $options = &$vars["options"];
+  $view = $vars["view"];
+  $rows = $vars["rows"];
+  $options = $vars["options"];
   $link = $view->display_handler->get_path();
   $url_options = array('absolute' => TRUE);
   if (!empty($view->exposed_raw_input)) {

@@ -22,7 +22,7 @@
  * @param $options
  * @return unknown_type
  */
-function theme_views_views_rdf_style(&$view, $rows = array(), $attachment = NULL, $options = array()) {
+function theme_views_views_rdf_style($view, $rows = array(), $attachment = NULL, $options = array()) {
 	if ($options['vocabulary'] == 'foaf') return theme('views_views_rdf_style_foaf', $view, $rows, $attachment, $options);
 	if ($options['vocabulary'] == 'sioc') return theme('views_views_rdf_style_sioc', $view, $rows, $attachment, $options);
 }
@@ -32,12 +32,12 @@ function theme_views_views_rdf_style(&$view, $rows = array(), $attachment = NULL
  * @param $vars
  * @return unknown_type
  */
-function template_preprocess_views_views_rdf_style_foaf(&$vars) {
+function template_preprocess_views_views_rdf_style_foaf($vars) {
 	global $user;
 	global $base_url; 
-  $view = &$vars["view"];
-  $rows = &$vars["rows"];
-  $options = &$vars["options"];
+  $view = $vars["view"];
+  $rows = $vars["rows"];
+  $options = $vars["options"];
   $link = $view->display_handler->get_path();
   $url_options = array('absolute' => TRUE);
   if (!empty($view->exposed_raw_input)) {
@@ -178,11 +178,11 @@ function template_preprocess_views_views_rdf_style_foaf(&$vars) {
  * @param $vars
  * @return unknown_type
  */
-function template_preprocess_views_views_rdf_style_sioc(&$vars) {
+function template_preprocess_views_views_rdf_style_sioc($vars) {
 	global $base_url; 
-  $view = &$vars["view"];
-  $rows = &$vars["rows"];
-  $options = &$vars["options"];
+  $view = $vars["view"];
+  $rows = $vars["rows"];
+  $options = $vars["options"];
   $link = $view->display_handler->get_path();
   $url_options = array('absolute' => TRUE);
   if (!empty($view->exposed_raw_input)) {

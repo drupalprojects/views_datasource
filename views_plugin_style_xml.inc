@@ -40,7 +40,7 @@ class views_plugin_style_xml extends views_plugin_style {
    * @param $form
    * @param $form_state
    */
-  function options_form(&$form, &$form_state) {
+  function options_form($form, $form_state) {
   	$form['schema'] = array(
       '#type' => 'radios',
       '#title' => ('XML schema'),
@@ -143,7 +143,7 @@ class views_plugin_style_xml extends views_plugin_style {
    * Implementation of view_style_plugin::render()
    */
   function render() {
-  	$view = &$this->view;
+  	$view = $this->view;
   	$options = $this->options;
   	$field = $view->field;
   	

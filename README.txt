@@ -10,6 +10,7 @@ references using &
 check for separator in profile fields
 properly handle multiple values grouped
 Atom encoding issue
+Add proper doc info to template files
 
 Current Version
 ---------------

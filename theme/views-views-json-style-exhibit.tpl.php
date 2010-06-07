@@ -3,7 +3,8 @@
 /**
  * @file views-views-json-style-exhibit.tpl.php
  * Default template for the Views JSON style plugin using the Simile/Exhibit format
- *
+ * 
+ * Variables:
  * - $view: The View object.
  * - $rows: Hierachial array of key=>value pairs to convert to JSON
  * - $options: Array of options for this style 

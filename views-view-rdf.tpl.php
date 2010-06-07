@@ -312,7 +312,7 @@ function rdf_sioc_xml_render($view) {
     // $xml .= "  <foaf:primaryTopic rdf:resource=\"$node_url\"/>\n";
     $xml .= "  <admin:generatorAgent rdf:resource=\"http://drupal.org/project/views_datasource\"/>\n";
     $xml .= "</foaf:Document>\n";
-    foreach ($view->result as $node) rdf_sioc_xml_node_render($node, &$users, &$nodes);
+    foreach ($view->result as $node) rdf_sioc_xml_node_render($node, $users, $nodes);
     foreach ($users as $user_xml) $xml .= $user_xml;
     foreach ($nodes as $node_xml) $xml .= $node_xml;
   }
@@ -372,7 +372,7 @@ function rdf_sioc_xml_user_render($node, $uid = NULL, $user_name = NULL, $user_e
   return $xml;
 }
 
-function rdf_sioc_xml_node_render($node, &$users = NULL, &$nodes = NULL) {
+function rdf_sioc_xml_node_render($node, $users = NULL, $nodes = NULL) {
   global $base_url;
   // i
   foreach ($node as $field_label => $field_value) {

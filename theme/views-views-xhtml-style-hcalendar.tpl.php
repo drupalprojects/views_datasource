@@ -4,6 +4,7 @@
  * @file views-views-xhtml-style-hcalendar.tpl.php
  * Default template for the Views XHTML style plugin using the hCalendar format
  *
+ * Variables:
  * - $view: The View object.
  * - $rows: Array of row objects as rendered by _views_xml_render_fields
  * - $hcalendar Array of hcalendar arrays as created by template_preprocess_views_views_xhtml_style_hcalendar 

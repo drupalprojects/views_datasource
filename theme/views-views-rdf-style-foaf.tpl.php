@@ -4,6 +4,7 @@
  * @file views-views-rdf-style-foaf.tpl.php
  * Default template for the Views RDF style plugin using the FOAF vocabulary
  *
+ * Variables
  * - $view: The View object.
  * - $rows: Array of row objects as rendered by _views_rdf_render_fields
  * - $persons Array of person objects as created by template_preprocess_views_views_rdf_style_foaf 
