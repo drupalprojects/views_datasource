@@ -49,20 +49,20 @@ function template_preprocess_views_views_xml_style_raw($vars) {
 		      $label = _views_xml_strip_illegal_xml_name_chars(check_plain(html_entity_decode(strip_tags($object->label))));
 		    else  $label = _views_xml_strip_illegal_xml_name_chars(check_plain(html_entity_decode((strip_tags($id)))));
 		    if (!$object->is_multiple) 
-		      $content = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($object->content))) : $object->content);
+		      $content = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($object->content))) : _views_xml_xmlEntities($object->content));
 		    else {
 		    	$content = array ();		   
 		    	foreach($object->content as $n=>$oc) {
-		    		$content[$n] = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc);		    		
+		    		$content[$n] = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : _views_xml_xmlEntities($oc));		    		
 		    	}
 		    }		    
 		  }
 		  elseif ($options['field_output'] == 'raw') {
 		   $label = _views_xml_strip_illegal_xml_name_chars(check_plain(html_entity_decode(strip_tags($id))));
 		   if (!$object->is_multiple) 
-		      $content = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($object->raw))) : $object->raw);
+		      $content = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($object->raw))) : _views_xml_xmlEntities($object->raw));
 		    else {
-		    	foreach($object->raw as $n=>$oc) $content[$n] = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc);
+		    	foreach($object->raw as $n=>$oc) $content[$n] = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : _views_xml_xmlEntities($oc));
 		    }
 		  }
 		  
@@ -204,17 +204,20 @@ function template_preprocess_views_views_xml_style_opml($vars) {
 	      }
 	  		elseif (drupal_strtolower($label) == "postdate") {
 	      	$value = $content;
-	      }	      
-	      if ($value) {
-	        $value = $field->raw;
-	      	if (intval($value))  // timestamp
-            $value = format_date(intval($value), 'custom', DATE_RFC822);
-          elseif (getdate($value))      // string date
-            $value = format_date(strtotime($value), 'custom', DATE_RFC822);
-	        //otherwise just pass the string as is
-          $outline["created"] = $value;
-	  	    continue;
 	      }
+//	      if ($value) {
+//	        $value = $field->raw;
+//	      	if (intval($value))  // timestamp
+//            $value = format_date(intval($value), 'custom', DATE_RFC822);
+//          elseif (getdate($value))      // string date
+//            $value = format_date(strtotime($value), 'custom', DATE_RFC822);
+//	        //otherwise just pass the string as is
+//          $outline["created"] = $value;
+//	  	    continue;
+//	      }
+	  	   $outline["created"] = $value;
+	  	   continue;	      	      	      
+	  	   
 	  	} 
       //Otherwise just use the $label and $content as attribute nam and value
 	    $outline[$label] = $content; 	    		
@@ -389,19 +392,20 @@ function template_preprocess_views_views_xml_style_atom($vars) {
 	      $value = $entry["last_comment_timestamp"];
 	    }
 	    //_views_rdf_debug_stop($value);
-	    if ($value) {
-	      if (is_numeric($value))  { // timestamp
-          //_views_xml_debug_stop($value);  
-	        $value = format_date(intval($value), 'custom', DATE_ATOM);
-	      }
-        else  {    // string date
-          $timestamp = strtotime($value);
-        	if ($timestamp) $value = format_date($timestamp, 'custom', DATE_ATOM);
-          //_views_xml_debug_stop($timestamp);
-        }
+//	    if ($value) {
+//	      if (is_numeric($value))  { // timestamp
+//          //_views_xml_debug_stop($value);  
+//	        $value = format_date(intval($value), 'custom', DATE_ATOM);
+//	      }
+//        else  {    // string date
+//          $timestamp = strtotime($value);
+//        	if ($timestamp) $value = format_date($timestamp, 'custom', DATE_ATOM);
+//          //_views_xml_debug_stop($timestamp);
+//        }
+//        $entry["updated"] = $value;
+//        _views_xml_debug_stop($entry["updated"]);
+//	    }
         $entry["updated"] = $value;
-        //_views_xml_debug_stop($entry["updated"]);
-	    }
   	}
   	
   	/* Check if content attribute exists and if not fall back to using node body */
