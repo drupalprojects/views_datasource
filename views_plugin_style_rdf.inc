@@ -36,7 +36,7 @@ class views_plugin_style_rdf extends views_plugin_style {
    * @param $form
    * @param $form_state
    */
-  function options_form($form, $form_state) {
+  function options_form(&$form, &$form_state) {
   	$form['vocabulary'] = array(
       '#type' => 'radios',
       '#title' => ('RDF vocabulary'),

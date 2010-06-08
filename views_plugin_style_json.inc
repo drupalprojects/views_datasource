@@ -21,7 +21,7 @@ class views_plugin_style_json extends views_plugin_style {
       $options['field_output'] = array('default' => 'normal', 'translatable' => FALSE);
       $options['plaintext_output'] = array('default' => TRUE, 'translatable' => FALSE);
       $options['format'] = array('default' => 'simple', 'translatable' => FALSE);
-      $options['content_type'] = array('default' => 'application/json', 'translatable' => FALSE);
+      $options['content_type'] = array('default' => 'default', 'translatable' => FALSE);
       $options['using_views_api_mode'] = array('default' => FALSE, 'translatable' => FALSE);
       return $options;
   	}
@@ -32,7 +32,7 @@ class views_plugin_style_json extends views_plugin_style {
    * @param $form
    * @param $form_state
    */
-  function options_form($form, $form_state) {
+  function options_form(&$form, &$form_state) {
   	$form['root_object'] = array(
     '#type' => 'textfield',
     '#title' => ('Root object name'),

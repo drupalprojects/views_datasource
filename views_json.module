@@ -270,8 +270,8 @@ function _views_json_encode_formatted($v, $depth = 0) {
 
     case 'resource':
     case 'string':
-      $search   = array('"', chr(92), chr(47), chr(8), chr(12), chr(13) . chr(10), chr(10), chr(13), chr(9));
-      $replace  = array('\"', '\\', '\/', '\b', '\f', '\n', '\n', '\r', '\t');
+      $search   = array('"', chr(92), chr(8), chr(12), chr(13) . chr(10), chr(10), chr(13), chr(9));
+      $replace  = array('\"', '\\', '\b', '\f', '\n', '\n', '\r', '\t');
       $output   = str_replace($search, $replace, $v);
 /* *
       $output = str_replace(array("\r", "\n", "<", ">", "&"),

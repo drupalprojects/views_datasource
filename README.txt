@@ -3,15 +3,6 @@ $Id$
 Views Datasource README
 -------------------------------------------------------------------------------
 
-
-proper dates for each format
-t() in options
-references using &
-check for separator in profile fields
-properly handle multiple values grouped
-Atom encoding issue
-Add proper doc info to template files
-
 Current Version
 ---------------
 6.x-1.0-BETA1
@@ -19,22 +10,39 @@ Current Version
 Release Notes
 -------------
 Fixed:
- http://drupal.org/node/286231
- http://drupal.org/node/286288
  http://drupal.org/node/533808
  http://drupal.org/node/459628
- 
- 
- 
- http://drupal.org/node/627716
- http://drupal.org/node/620964
+ http://drupal.org/node/384906
+ http://drupal.org/node/296279
+ http://drupal.org/node/607730
+ http://drupal.org/node/286673
+ http://drupal.org/node/647282
  http://drupal.org/node/646424
  http://drupal.org/node/680110
+ http://drupal.org/node/318864
+ http://drupal.org/node/633702
+ http://drupal.org/node/687714
+ http://drupal.org/node/685506
+ http://drupal.org/node/682782
+ http://drupal.org/node/614354
+ http://drupal.org/node/290879
+ http://drupal.org/node/734142
  http://drupal.org/node/725304
+ http://drupal.org/node/768916
+ http://drupal.org/node/620964
+ http://drupal.org/node/627716
+ http://drupal.org/node/730776
  http://drupal.org/node/790610
- 
+ http://drupal.org/node/790610
+ http://drupal.org/node/800744
+ http://drupal.org/node/801828
+ http://drupal.org/node/804916
+ http://drupal.org/node/803186
+ http://drupal.org/node/805902
+ http://drupal.org/node/449904
+  
 
-This first beta release has significant changes from the alpha release. 
+This first beta release has significant changes from the alpha releases. 
 To upgrade from the previous version you should first:
   1. Set your view's style to Unformatted or any one of the built-in
      view styles.
@@ -105,7 +113,7 @@ properties defined in the view. For example to create an <email> element inside
 the <div class="hcard"> root element, just have one or more fields in the view
 containing the text 'email'.
 
-The FOAF and \hCard renderers are most useful with view based on user profiles 
+The FOAF and hCard renderers are most useful with view based on user profiles 
 where you can create profile fields corresponding to properties defined in the 
 FOAF (http://xmlns.com/foaf/spec/) or hCard 
 (http://microformats.org/wiki/hcard-cheatsheet) spec. However any node type 
@@ -254,4 +262,10 @@ The views_xhtml plugin has the following options:
      class, category, description, summary, dtstart(Event start, event_start)
      dtend(Event end, event_end).
      
+ 
+ TODO
+ ----
+Proper date handling for each format
+Check for separator in profile fields
+Properly handle grouped multiple values in views_xhtml et. al
      
