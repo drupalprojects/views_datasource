@@ -215,8 +215,8 @@ function template_preprocess_views_views_xml_style_opml($vars) {
 //          $outline["created"] = $value;
 //	  	    continue;
 //	      }
-	  	   $outline["created"] = $value;
-	  	   continue;	      	      	      
+	  	   if ($value) $outline["created"] = $value;
+	  	   //continue;	      	      	      
 	  	   
 	  	} 
       //Otherwise just use the $label and $content as attribute nam and value
