@@ -68,14 +68,14 @@ function template_preprocess_views_views_xml_style_raw($vars) {
 		  
 		  if ($options['element_output'] == 'nested') {		  	
 			  if (!is_array($content)) {
-			  	$xml .= "      <$label>".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>\n": $content)."</$label>\n";
+			  	$xml .= "    <$label>".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>": $content)."</$label>\n";
 			  	//_views_xml_debug_stop($xml);
 			  }
 			  else {
 			  	foreach ($content as $c) {
-		  	    $xml .= "    <$label>\n";
-			      $xml .= "      ".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$c]]>\n": $c."\n");
-			      $xml .= "    </$label>\n";			  		
+		  	    $xml .= "    <$label>";
+			      $xml .= "".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$c]]>": $c."");
+			      $xml .= "</$label>\n";			  		
 			  	}			  	
 			  }
 		  }
