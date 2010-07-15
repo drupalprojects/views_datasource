@@ -23,7 +23,13 @@ if (!$header) { //build our own header
 	$xml .= "  <link rel =\"self\" type=\"application/atom+xml\" href=\"$link\" />\n";
 	$xml .= "  <id>tag:$link</id> \n";
 	$xml .= "  <updated>$updated</updated>\n";
-	        
+	if ($author) {
+		$xml .= "  <author>\n";
+		$xml .= "    <name>".$author["name"]."</name>\n"; 
+		if (array_key_exists("email", $author))
+		  $xml .= "    <email>".$author["email"]."</email>\n";
+	  $xml .= "  </author>\n";
+	}        
 }
 else {  
   $xml .= "  $header\n";

@@ -241,7 +241,7 @@ function template_preprocess_views_views_xml_style_atom($vars) {
   	$vars["title"] = check_plain(($view->get_title() ? $view->get_title(): $view->name));
   	$vars["id"] = check_url($view->get_url());
   	$vars["updated"] = format_date(time(), 'custom', DATE_ATOM);
-  	$vars["author"] = _views_xml_format_author($options["author"]);  
+  	if ($options["author"]) $vars["author"] = _views_xml_format_author($options["author"]);  
     $vars['link'] = check_url(url($view->display_handler->get_path(), $url_options));
   } else $vars["header"] = $header;
 	$entries = array();
