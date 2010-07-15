@@ -15,19 +15,6 @@
  */
 
 /**
- * Main theme function for the style plugin - just acts as a switch to pass control to the other themes
- * @param $view
- * @param $rows
- * @param $attachment
- * @param $options
- * @return unknown_type
- */
-function theme_views_views_rdf_style($view, $rows = array(), $attachment = NULL, $options = array()) {
-	if ($options['vocabulary'] == 'foaf') return theme('views_views_rdf_style_foaf', $view, $rows, $attachment, $options);
-	if ($options['vocabulary'] == 'sioc') return theme('views_views_rdf_style_sioc', $view, $rows, $attachment, $options);
-}
-
-/**
  * Template preprocess for the FOAF vocabulary
  * @param $vars
  * @return unknown_type

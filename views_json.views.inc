@@ -26,6 +26,7 @@ function views_json_views_plugins() {
 		      'theme'           => 'views_views_json_style',
 	        'theme file'      => 'views_views_json_style.theme.inc',
 	        'theme path'      => $path.'/theme',
+	        'additional themes' => array ('views_views_json_style_simple' => 'style', 'views_views_json_style_exhibit' => 'style'),
           'uses row plugin' => FALSE,
           'uses fields'     => TRUE,
           'uses options'    => TRUE,

@@ -90,10 +90,30 @@ class views_plugin_style_rdf extends views_plugin_style {
       '#type'           => 'checkbox',
       '#title'          => ('Views API mode'),
       '#default_value'  => $this->options['using_views_api_mode'],
-      '#description'    => ('Not using View API mode means the JSON gets output directly and the server ceases normal page processing.  Using it means the server does not cease processing after outputting the JSON.  This allows the Views API to be used with the view without having to prematurely terminate page processing.'),
+      '#description'    => ('Not using View API mode means the RDF gets output directly and the server ceases normal page processing.  Using it means the server does not cease processing after outputting the JSON.  This allows the Views API to be used with the view without having to prematurely terminate page processing.'),
     );
   }
 
+  /**
+   * Implementation of views_style_plugin::theme_functions(). Returns an array of theme functions to use.
+   * for the current style plugin
+   * @return array 
+   */
+  function theme_functions() {
+    $options = $this->options;
+    if ($options['vocabulary'] == 'foaf') $hook = 'views_views_rdf_style_foaf';
+	  if ($options['vocabulary'] == 'sioc') $hook = 'views_views_rdf_style_sioc'; 
+  	return views_theme_functions($hook, $this->view, $this->display);
+  }
+
+/**
+ * Implementation of views_style_plugin::additional_theme_functions(). Returns empty array.
+ * @return array
+ */  
+  function additional_theme_functions() {
+  	return array();
+  }
+  
   /**
    * Implementation of view_style_plugin::render()
    */
@@ -108,7 +128,7 @@ class views_plugin_style_rdf extends views_plugin_style {
       $rows[] = _views_rdf_render_fields($view, $row);
     }
     
- 	  return theme($this->theme_functions(), $this->view, $rows, $this->attachment, $this->options); 	  
+ 	  return theme($this->theme_functions(), $this->view, $this->options, $rows); 	  
  	}
 
 }

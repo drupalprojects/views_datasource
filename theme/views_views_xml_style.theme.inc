@@ -14,20 +14,6 @@
  * @see views_xml.views.inc
  */
 
-/**
- * Main theme function for the style plugin - just acts as a switch to pass control to the other themes
- * @param $view
- * @param $rows
- * @param $attachment
- * @param $options
- * @return unknown_type
- */
-function theme_views_views_xml_style($view, $rows = array(), $attachment = NULL, $options = array()) {
-	if ($options['schema'] == 'raw') return theme('views_views_xml_style_raw', $view, $rows, $attachment, $options);
-	if ($options['schema'] == 'opml') return theme('views_views_xml_style_opml', $view, $rows, $attachment, $options);
-	if ($options['schema'] == 'atom') return theme('views_views_xml_style_atom', $view, $rows, $attachment, $options);
-}
-
 function template_preprocess_views_views_xml_style_raw($vars) {
 	$view = $vars["view"];
   $rows = $vars["rows"];

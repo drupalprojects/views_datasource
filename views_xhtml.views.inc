@@ -25,11 +25,13 @@ function views_xhtml_views_plugins() {
         'handler'         => 'views_plugin_style_xhtml',
         'theme'           => 'views_views_xhtml_style',
 	      'theme file'      => 'views_views_xhtml_style.theme.inc',
-	      'theme path'      => $path.'/theme', 
+	      'theme path'      => $path.'/theme',
+        'additional themes' => array ('views_views_xhtml_style_hcard' => 'style', 'views_views_xhtml_style_hcalendar' => 'style'), 
         'uses row plugin' => FALSE,
         'uses fields'     => TRUE,
         'uses options'    => TRUE,
         'type'            => 'normal',
+        
       ),
     ),
   );
