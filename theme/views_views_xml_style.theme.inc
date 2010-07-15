@@ -20,7 +20,9 @@ function template_preprocess_views_views_xml_style_raw($vars) {
   $options = $vars["options"];  
   $base = $view->base_table;
   $root = $options['root_element'];
-  $top_child_object = $options["top_child_object"];  
+  $endroot = preg_replace("/\s+.*/", "", $root);
+  $top_child_object = $options["top_child_object"];
+  $end_top_child_object = preg_replace("/\s+.*/", "", $top_child_object);    
   $plaintext_output = $options["plaintext_output"];
   $content_type = ($options['content_type'] == 'default') ? 'text/xml' : $options['content_type'];
   $header = $options['header'];
@@ -51,17 +53,17 @@ function template_preprocess_views_views_xml_style_raw($vars) {
 		    	foreach($object->raw as $n=>$oc) $content[$n] = ($plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : _views_xml_xmlEntities($oc));
 		    }
 		  }
-		  
+		  $endlabel = preg_replace("/\s+.*/", "", $label);
 		  if ($options['element_output'] == 'nested') {		  	
 			  if (!is_array($content)) {
-			  	$xml .= "    <$label>".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>": $content)."</$label>\n";
+			  	$xml .= "    <$label>".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>": $content)."</$endlabel>\n";
 			  	//_views_xml_debug_stop($xml);
 			  }
 			  else {
 			  	foreach ($content as $c) {
 		  	    $xml .= "    <$label>";
 			      $xml .= "".(($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$c]]>": $c."");
-			      $xml .= "</$label>\n";			  		
+			      $xml .= "</$endlabel>\n";			  		
 			  	}			  	
 			  }
 		  }
@@ -80,9 +82,9 @@ function template_preprocess_views_views_xml_style_raw($vars) {
 		  }
 	  }
 
-	  $xml .= ($options['element_output'] == 'nested') ? "  </$top_child_object>\n": "/>\n";
+	  $xml .= ($options['element_output'] == 'nested') ? "  </$end_top_child_object>\n": "/>\n";
 	}
-	$xml .= "</$root>\n";
+	$xml .= "</$endroot>\n";
 	$vars["xml"] = $xml;
 }
 
