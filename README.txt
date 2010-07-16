@@ -5,53 +5,24 @@ Views Datasource README
 
 Current Version
 ---------------
-6.x-1.0-BETA1
+6.x-1.0-BETA2
 
 Release Notes
 -------------
 Fixed:
- http://drupal.org/node/533808
- http://drupal.org/node/459628
- http://drupal.org/node/384906
- http://drupal.org/node/296279
- http://drupal.org/node/607730
- http://drupal.org/node/286673
- http://drupal.org/node/647282
- http://drupal.org/node/646424
- http://drupal.org/node/680110
- http://drupal.org/node/318864
- http://drupal.org/node/633702
- http://drupal.org/node/687714
- http://drupal.org/node/685506
- http://drupal.org/node/682782
- http://drupal.org/node/614354
- http://drupal.org/node/290879
- http://drupal.org/node/734142
- http://drupal.org/node/725304
- http://drupal.org/node/768916
- http://drupal.org/node/620964
- http://drupal.org/node/627716
- http://drupal.org/node/730776
- http://drupal.org/node/790610
- http://drupal.org/node/790610
- http://drupal.org/node/800744
- http://drupal.org/node/801828
- http://drupal.org/node/804916
- http://drupal.org/node/803186
- http://drupal.org/node/805902
- http://drupal.org/node/449904
-  
-
-This first beta release has significant changes from the alpha releases. 
-To upgrade from the previous version you should first:
-  1. Set your view's style to Unformatted or any one of the built-in
-     view styles.
-  2. Disable all 4 Views Datasource modules.
-  3. Delete each Views Datasource module folder from your modules folder.
-  4. Place the new versions of the modules in your modules folder.
-  5. Reenable each module.
-  6. Set your views' style to whichever plugin you were using. Check the
-     settings to see the new options available for the plugin.
+http://drupal.org/node/838264 Patch by levjj to add DOAP support to views_rdf
+http://drupal.org/node/844442 Views theme overriding now works as it should
+http://drupal.org/node/855166 author element is now included in Atom doc header
+http://drupal.org/node/847716: Closing tag of an XML element does not include
+xmlns or any additional attributes defined on the starting tag.
+ 
+Upgrade Notes
+-------------
+ To upgrade from the beta1 release you can simply drop in the new files into
+ the modules folder, however if you have views that rely on theme overriding
+ you should rescan template files for your view in the view's Theme:information. 
+ Otherwise if you notice anything screwy or breakage try rescanning template
+ files also .
  
 About
 -----
@@ -275,4 +246,7 @@ The views_xhtml plugin has the following options:
 Proper date handling for each format
 Check for separator in profile fields
 Properly handle grouped multiple values in views_xhtml et. al
+Strict conformance with Atom spec
+Recognize when field rewriting rules are used
+Represent multiple-valued fields using nested child elements  
      
