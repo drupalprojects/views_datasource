@@ -61,14 +61,14 @@ formats allow content in a Drupal site to be easily used as data sources for
 Semantic Web clients and web mash-ups. Views Datasource plugins output content 
 from node lists created in Drupal Views as:
   1)XML data documents using schemas like OPML and Atom;
-  2)RDF/XML data documents using vocabularies like FOAF and SIOC;
+  2)RDF/XML data documents using vocabularies like FOAF, SIOC and DOAP;
   3)JSON data documents in plain JSON or in a format like MIT Simile/Exhibit;
   4)XHTML data documents using microformat like hCard and hCalendar
   
 The project consists of 4 Views style plugins:
   1)views_xml - Output as raw XML, OPML, and Atom;
   2)views_json - Output as simple JSON and Simile/Exhibit JSON;
-  3)views_rdf - Output as FOAF and SIOC;
+  3)views_rdf - Output as FOAF, SIOC and DOAP;
   4)views_xhtml - Output as hCard and hCalendar.
   
 In Drupal 6.x, to use these plugins you should:
@@ -76,7 +76,7 @@ In Drupal 6.x, to use these plugins you should:
 2) In the Views UI set the view style (in Basic Settings) to one of:
    i)  JSON data document (render as Simple JSON or Simile/Exhibit JSON)
    ii) XML data document (render as raw XML, OPML, or Atom)
-   iii) RDF data document (render as a FOAF or SIOC RDF/XML document)
+   iii) RDF data document (render as a FOAF or SIOC or DOAP RDF/XML document)
    iv) XHTML data document (render as hCard or hCalendar XHTML)
 3) In the view style options choose the options or vocabulary for your format 
    (like raw or the OPML or Atom vocabulary for XML rendering.)
@@ -226,16 +226,18 @@ The views_xml plugin has the following options:
 The views_rdf plugin has the following options:
   1. RDF vocabulary:
      This indicates what RDF vocabulary to use in the document: either
-     FOAF or SIOC. FOAF (Friend of a Friend) is useful for sharing a list of 
-     users or people, while SIOC 
+     FOAF or SIOC or DOAP . FOAF (Friend of a Friend) is useful for sharing a 
+     list of  users or people, while SIOC 
      (Semantically-Interlinked Online Communities Project) is most useful for 
      describing a set of pages, stories, blogs,
      or forum posts with comments from different people. SIOC itself uses
-     FOAF to describe the posts and comments from different people. See
-     these links for more info:
-     http://www.foaf-project.org/
-     http://sioc-project.org/
-     
+     FOAF to describe the posts and comments from different people. DOAP
+     (Description of a Project) is useful for - as the name suggests - projects.
+     See these links for more info:
+      http://www.foaf-project.org/
+      http://sioc-project.org/
+      http://trac.usefulinc.com/doap
+          
      The following fields are recognized when using the FOAF vocabulary 
      (fallbacks in brackets):
      name, firstname, surname, title, nick, mbox (mail, email), mbox_sha1sum,
@@ -246,6 +248,11 @@ The views_rdf plugin has the following options:
      id (nid), created(node_created, Post date, title, type (node_type), 
      changed (node_changed, updated/commented date) last_updated(updated date), 
      body(node_body, node_revisions_body), uid (users_uid). 
+     
+     The following fields are recognized when using the DOAP vocabulary:
+     (optional fields in square brackets)
+     nid, name, homepage, [license], [shortdesc], [language], [repositories],
+     [developers]
      
 The views_xhtml plugin has the following options:
   1. Microformat

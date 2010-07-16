@@ -496,3 +496,123 @@ function _views_rdf_sioc_xml_story_render($nid, $title, $type, $created, $change
   $xml .= "</sioc:Post>\n";
   return $xml;
 }
+
+/**
+ * Template preprocess for the DOAP vocabulary
+ * @param $vars
+ * @return none
+ */
+function template_preprocess_views_views_rdf_style_doap($vars) {
+  global $user;
+  global $base_url; 
+  $view = $vars["view"];
+  $rows = $vars["rows"];
+  $options = $vars["options"];
+  $link = $view->display_handler->get_path();
+  $url_options = array('absolute' => TRUE);
+  if (!empty($view->exposed_raw_input)) {
+    $url_options['query'] = $view->exposed_raw_input;
+  }
+  $base = $view->base_table;
+  $root = "feed";
+  $plaintext_output = $options["plaintext_output"];
+  $vars["content_type"] = ($options['content_type'] == 'default') ? 'application/atomrdf' : $options['content_type'];
+  $header  = $options["header"];
+  if (!$vars["header"]) {
+    $vars["title"] = check_plain(($view->get_title() ? $view->get_title(): $view->name));
+    $vars["id"] = check_url($view->get_url());
+    $vars["updated"] = format_date(time(), 'custom', DATE_ATOM);
+    $vars["author"] = _views_rdf_format_author($options["author"]);
+    $vars['link'] = check_url(url($view->display_handler->get_path(), $url_options));
+  }
+  else {
+    $vars["header"] = $header;
+  }
+  $projects = array();
+  foreach($rows as $row) {
+    if (array_key_exists($row["nid"], $projects)) {
+      $project = $projects[$row["nid"]];
+    }
+    else {
+      $project = array();
+      $project["repositories"] = array();
+      $project["developers"] = array();
+      $project["nid"] = $row["nid"];
+    }
+    foreach ($row as $field) {
+      if ($options["field_output"] == "normal") {
+        if ($field->label) {
+          $label = $plaintext_output ?
+            check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
+        }
+        else {
+          $label = $plaintext_output ?
+            check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+        }
+        if (!$field->is_multiple) {
+          $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+        }
+        else {
+          $content = array();
+          foreach($field->content as $n=>$oc) {
+            $content[$n] = $plaintext_output ?
+              check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+          }
+          $content = implode(" ", $content);
+        }
+      }
+      elseif ($options["field_output"] == "raw") {
+        $label = $plaintext_output ?
+          check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+        if (!$field->is_multiple) {
+          $content = $plaintext_output ?
+            check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
+        }
+        else {
+          $content = array();
+          foreach($field->raw as $n=>$oc) {
+            $content[$n] = $plaintext_output ?
+              check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+          }
+          $content = implode(" ", $content);
+        }
+      }
+      if (stripos($label, 'homepage') !== FALSE) {
+        $project["homepage"] = _views_rdf_strip_illegal_xml_attribute_value_chars($content);
+        continue;
+      }
+      if (stripos($label, 'title') !== FALSE) {
+        $project["name"] = check_plain($content);
+        continue;
+      }
+      if (stripos($label, 'shortdesc') !== FALSE) {
+        $project["shortdesc"] = check_plain($content);
+        continue;
+      }
+      if (stripos($label, 'language') !== FALSE) {
+        $project["language"] = check_plain($content);
+        continue;
+      }
+      if (stripos($label, 'license') !== FALSE) {
+        $project["license"] = _views_rdf_strip_illegal_xml_attribute_value_chars($content);
+        continue;
+      }
+      if (stripos($label, 'repository') !== FALSE) {
+        $repo = _views_rdf_strip_illegal_xml_attribute_value_chars($content);
+        if (!in_array($repo, $project["repositories"])) {
+          $project["repositories"][] = $repo;
+        }
+        continue;
+      }
+      if (stripos($label, 'authors') !== FALSE) {
+        $dev = check_plain($content);
+        if (!in_array($dev, $project["developers"])) {
+          $project["developers"][] = $dev;
+        }
+        continue;
+      }
+    }
+    $projects[$project["nid"]] = $project;
+  }//for
+  $vars["projects"] = $projects;
+ }

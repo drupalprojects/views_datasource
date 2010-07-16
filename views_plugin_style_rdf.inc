@@ -41,7 +41,7 @@ class views_plugin_style_rdf extends views_plugin_style {
       '#type' => 'radios',
       '#title' => ('RDF vocabulary'),
       '#description' => ('The RDF vocabulary to use when rendering the view.'),    
-      '#options' => array('foaf' => ('FOAF'), 'sioc' => ('SIOC')),
+      '#options' => array('foaf' => ('FOAF'), 'sioc' => ('SIOC'), 'doap' => ('DOAP')),
       '#default_value' => $this->options['vocabulary'],
     );
    $form['field_output']  = array(
@@ -102,7 +102,9 @@ class views_plugin_style_rdf extends views_plugin_style {
   function theme_functions() {
     $options = $this->options;
     if ($options['vocabulary'] == 'foaf') $hook = 'views_views_rdf_style_foaf';
-	  if ($options['vocabulary'] == 'sioc') $hook = 'views_views_rdf_style_sioc'; 
+	  if ($options['vocabulary'] == 'sioc') $hook = 'views_views_rdf_style_sioc';
+	  if ($options['vocabulary'] == 'doap') $hook = 'views_views_rdf_style_doap';
+	   
   	return views_theme_functions($hook, $this->view, $this->display);
   }
 
