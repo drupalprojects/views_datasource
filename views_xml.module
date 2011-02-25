@@ -1,5 +1,4 @@
 <?php
-//$Id$
 /**
  * @file
  * views_xml.module - provides Views plugin for rendering node content as XML.

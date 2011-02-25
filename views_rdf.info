@@ -1,4 +1,3 @@
-;$Id$
 name = Views RDF
 description = "Views style plugin to render node content as RDF."
 package = Views

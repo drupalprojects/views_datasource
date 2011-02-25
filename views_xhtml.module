@@ -1,5 +1,4 @@
 <?php
-//$Id$
 /**
  * @file
  * Provides Views plugin for rendering node content as XHTML microformats.

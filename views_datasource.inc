@@ -1,5 +1,4 @@
 <?php
-//$Id$
 /**
  * @file
  * Provides common functions for views_datasource.
