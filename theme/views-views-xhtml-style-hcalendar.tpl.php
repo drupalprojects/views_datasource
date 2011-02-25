@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file views-views-xhtml-style-hcalendar.tpl.php
  * Default template for the Views XHTML style plugin using the hCalendar format

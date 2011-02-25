@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file views-views-json-style.tpl.php

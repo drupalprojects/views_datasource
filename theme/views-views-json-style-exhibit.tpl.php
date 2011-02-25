@@ -1,5 +1,4 @@
 <?php
-//$Id$
 /**
  * @file views-views-json-style-exhibit.tpl.php
  * Default template for the Views JSON style plugin using the Simile/Exhibit format

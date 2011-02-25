@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file views-views-xml-style-raw.tpl.php
  * Default template for the Views XML style plugin using the raw schema

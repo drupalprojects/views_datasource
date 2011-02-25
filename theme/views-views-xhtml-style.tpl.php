@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file views-views-xhtml-style.tpl.php

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file views-views-rdf-style-foaf.tpl.php
  * Default template for the Views RDF style plugin using the FOAF vocabulary

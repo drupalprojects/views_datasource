@@ -1,4 +1,3 @@
-; $Id$
 name = Views XHTML
 description = "Views style plugin to render node content as XHTML microformats."
 package = Views
