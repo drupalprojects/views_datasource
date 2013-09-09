@@ -22,9 +22,9 @@ function views_json_views_api() {
  * @param $values
  * @return unknown_type
  */
-function _views_json_render_multiple_field($field, $values) {  
+function _views_json_render_multiple_field($field, $values) {
     $options = $field->options;
-	  // If this is not a grouped field, use content_handler_field::render().
+    // If this is not a grouped field, use content_handler_field::render().
     if (!$field->defer_query) {
       return $field->render($values);
     }
@@ -86,7 +86,7 @@ function _views_json_render_multiple_field($field, $values) {
         if (count($rendered) > 1) {
           // TODO: could we use generic field display ?
           //return theme('content_view_multiple_field', $rendered, $content_field, $values);
-        	return $rendered;
+          return $rendered;
         }
         elseif ($rendered) {
           return $rendered[1];
@@ -98,65 +98,71 @@ function _views_json_render_multiple_field($field, $values) {
 }
 
 /**
- * Takes each field from a row object and renders the field as determined by the field's theme 
- * 
+ * Takes each field from a row object and renders the field as determined by the field's theme
+ *
  * @param $view
- * 	 View the row belongs to 
+ *   View the row belongs to
  * @param $row
  *   Row object
  * @return array
- *   Object containing all the raw and rendered fields  
+ *   Object containing all the raw and rendered fields
  */
-function _views_json_render_fields($view, $row) {  
+function _views_json_render_fields($view, $row) {
   $field_ids = array_keys($view->field);
   $rendered_fields = array();
-  foreach ($field_ids as $id) {  
-  	$field = $view->field[$id];
+  foreach ($field_ids as $id) {
+    $field = $view->field[$id];
     $field_is_multiple = FALSE;
     $field_raw = array();
-    if ((isset($field->options['multiple']['group']))&& isset($field->field_values)) {    	
-    	$field_output = _views_json_render_multiple_field($field, $row);    	
-    	$n = 0;
-    	if (is_array($field_output)) {
-    	  foreach ($field->field_values[$row->{$field->field_alias}] as $item) {
-          $field_raw[++$n] = $item["value"];            		
-    	  }
-    	  $field_is_multiple = TRUE;
-    	}
-    	else $field_raw = $view->field[$field->options['id']]->theme($row);     	 
-    }    
+    if ((isset($field->options['multiple']['group']))&& isset($field->field_values)) {
+      $field_output = _views_json_render_multiple_field($field, $row);
+      $n = 0;
+      if (is_array($field_output)) {
+        foreach ($field->field_values[$row->{$field->field_alias}] as $item) {
+          $field_raw[++$n] = $item["value"];
+        }
+        $field_is_multiple = TRUE;
+      }
+      else $field_raw = $view->field[$field->options['id']]->theme($row);
+    }
     else {
       $field_output = $view->field[$field->options['id']]->theme($row);
       $field_raw = (isset($view->field[$id]->field_alias) && isset($row->{$view->field[$id]->field_alias})) ? $row->{$view->field[$id]->field_alias} : NULL;
     }
-    
+
     $img_match = array();
     $src_match = array();
     if (is_array($field_output)) {
       foreach ($field_output as $i=>$f) {
         if (preg_match("/<img[^>]+>/i", $f, $img_match)) {
-    	    if (preg_match('/(src)="([^"]*)"/i', $img_match[0], $src_match))
-    	    $field_output[$i] = ($src_match[2]);
-        }      	
-      }        	
+          if (preg_match('/(src)="([^"]*)"/i', $img_match[0], $src_match))
+          $field_output[$i] = ($src_match[2]);
+        }
+      }
     }
     else {
       if (preg_match("/<img[^>]+>/i", $field_output, $img_match)) {
-    	  if (preg_match('/(src)="([^"]*)"/i', $img_match[0], $src_match))
-    	    $field_output = ($src_match[2]);
-      }      	    	
+        if (preg_match('/(src)="([^"]*)"/i', $img_match[0], $src_match))
+          $field_output = ($src_match[2]);
+      }
     }
-    
-    if (empty($field->options['exclude']) && ($field_output != "") && !empty($field_output)) {
-    	$object = new stdClass();      
+
+    if (empty($field->options['exclude']) && !($field->options['hide_empty'] && (empty($field_output)))) {
+      $object = new stdClass();
       $object->id = $id;
-      $object->content = $field_output;
+      // Respect the 'empty' value if empty and "No results text" is given.
+      if (empty($field_output) && $field->options['empty']) {
+        $object->content = $field->options['empty'];
+      }
+      else {
+        $object->content = $field_output;
+      }
       $object->raw = $field_raw;
       $object->class = views_css_safe($id);
       $object->label = check_plain($view->field[$id]->label());
-      $object->is_multiple = $field_is_multiple;       
-      $rendered_fields[$id] = $object;      
-    } 
+      $object->is_multiple = $field_is_multiple;
+      $rendered_fields[$id] = $object;
+    }
   }
   return $rendered_fields;
 }
@@ -282,8 +288,8 @@ function _views_json_encode_formatted($v, $depth = 0) {
 }
 
 function _views_json_debug_stop($var,$location) {
-	print ("Location:$location\n");
-	var_dump($var);
-	module_Invoke_all('exit');
-	exit;
+  print ("Location:$location\n");
+  var_dump($var);
+  module_Invoke_all('exit');
+  exit;
 }
