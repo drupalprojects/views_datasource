@@ -6,7 +6,7 @@
  * Variables:
  * - $view: The View object.
  * - $rows: Hierachial array of key=>value pairs to convert to JSON
- * - $options: Array of options for this style 
+ * - $options: Array of options for this style
  *
  * @ingroup views_templates
  */
@@ -14,10 +14,12 @@
 $jsonp_prefix = $options['jsonp_prefix'];
 
 if ($view->override_path) {
-	// We're inside a live preview where the JSON is pretty-printed.
-	$json = _views_json_encode_formatted($rows);
-	if ($jsonp_prefix) $json = "$jsonp_prefix($json)";	
-	print "<code>$json</code>";
+  // We're inside a live preview where the JSON is pretty-printed.
+  $json = _views_json_encode_formatted($rows);
+  if (isset($_GET[$jsonp_prefix]) && $jsonp_prefix) {
+    $json = $_GET[$jsonp_prefix] . '(' . $json . ')';
+  }
+  print "<code>$json</code>";
 }
 else {
   $json = json_encode($rows);
