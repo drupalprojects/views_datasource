@@ -5,7 +5,7 @@
  * View template to render view fields as xhtml.
  *
  * - $view: The view in use.
- * - $rows: Array of row objects as rendered by _views_json_render_fields 
+ * - $rows: Array of row objects as rendered by _views_json_render_fields
  * - $attachment: not used currently
  * - $options: The options for the style passed in from the UI.
  *
@@ -13,9 +13,9 @@
  * @see views_xhtml.views.inc
  */
 
-function template_preprocess_views_views_xhtml_style_hcard($vars) {
-	global $user;
-	global $base_url; 
+function template_preprocess_views_views_xhtml_style_hcard(&$vars) {
+  global $user;
+  global $base_url;
   $view = $vars["view"];
   $rows = $vars["rows"];
   $options = $vars["options"];
@@ -24,17 +24,17 @@ function template_preprocess_views_views_xhtml_style_hcard($vars) {
   if (!empty($view->exposed_raw_input)) {
     $url_options['query'] = $view->exposed_raw_input;
   }
-	$base = $view->base_table;
+  $base = $view->base_table;
   $plaintext_output = $options["plaintext_output"];
   $vars["content_type"] = ($options['content_type'] == 'default') ? 'text/html' : $options['content_type'];
   $header  = $options["header"];
   if (!$vars["header"]) {
-  	$vars["title"] = check_plain(($view->get_title() ? $view->get_title(): $view->name));
-  	$vars["id"] = check_url($view->get_url());
-  	$vars["author"] = _views_xhtml_format_author($options["author"]);
+    $vars["title"] = check_plain(($view->get_title() ? $view->get_title(): $view->name));
+    $vars["id"] = check_url($view->get_url());
+    $vars["author"] = _views_xhtml_format_author($options["author"]);
     $vars['link'] = check_url(url($view->display_handler->get_path(), $url_options));
   } else $vars["header"] = $header;
-	$hcards = array();
+  $hcards = array();
   foreach($rows as $row) {
     $hcard = array(
       'adr' => array(
@@ -68,33 +68,33 @@ function template_preprocess_views_views_xhtml_style_hcard($vars) {
       'photo' => '',
       'tel' => array(),
     );
-  	foreach ($row as $field) {
-  	  if ($options["field_output"] == "normal") {
-  	  	if ($field->label)
-  	  	  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
-  	  	else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	if (!$field->is_multiple) 
-		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
-		    else {		    	
-		    	$content = array();
-		    	foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
-		    	$content = implode(" ", $content);
-		    }  	  	    	  	    	  	
-  	  }
-  	  elseif ($options["field_output"] == "raw") {
-  	  	$label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	    if (!$field->is_multiple) 
-		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
-		    else { 
-		      $content = array();
-		      foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
-		      $content = implode(" ", $content);
-		    }  	  	  	    	  	
-  	  }
-  	  $label = _views_xml_strip_illegal_xml_name_chars(html_entity_decode(check_plain(strip_tags($label))));
-  	  $content = (($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>": $content);
-  	  //if (($options["skip_empty_fields"] == TRUE) && (is_null($content) || $content === "")) continue;
-  	  if ((stripos($label, 'address_type') !== FALSE) || (stripos($label, 'addresstype') !== FALSE)) {
+    foreach ($row as $field) {
+      if ($options["field_output"] == "normal") {
+        if ($field->label)
+          $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
+        else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+        if (!$field->is_multiple)
+          $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+        else {
+          $content = array();
+          foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+          $content = implode(" ", $content);
+        }
+      }
+      elseif ($options["field_output"] == "raw") {
+        $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+        if (!$field->is_multiple)
+          $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
+        else {
+          $content = array();
+          foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+          $content = implode(" ", $content);
+        }
+      }
+      $label = _views_xml_strip_illegal_xml_name_chars(html_entity_decode(check_plain(strip_tags($label))));
+      $content = (($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>": $content);
+      //if (($options["skip_empty_fields"] == TRUE) && (is_null($content) || $content === "")) continue;
+      if ((stripos($label, 'address_type') !== FALSE) || (stripos($label, 'addresstype') !== FALSE)) {
         $hcard['adr']['type'] = $content;
       }
       if ((stripos($label, 'post_office_box') !== FALSE) || (stripos($label, 'postofficebox') !== FALSE)) {
@@ -169,15 +169,15 @@ function template_preprocess_views_views_xhtml_style_hcard($vars) {
       }
       if (stripos($label, 'tel') === 0) {
         $hcard['tel'][$label] = $content;
-      }	
-  	} $hcards[] = $hcard;
+      }
+    } $hcards[] = $hcard;
   }//for
-  $vars["hcards"] = $hcards;  
+  $vars["hcards"] = $hcards;
 }
 
-function template_preprocess_views_views_xhtml_style_hcalendar($vars) {
-	global $user;
-	global $base_url; 
+function template_preprocess_views_views_xhtml_style_hcalendar(&$vars) {
+  global $user;
+  global $base_url;
   $view = $vars["view"];
   $rows = $vars["rows"];
   $options = $vars["options"];
@@ -186,45 +186,45 @@ function template_preprocess_views_views_xhtml_style_hcalendar($vars) {
   if (!empty($view->exposed_raw_input)) {
     $url_options['query'] = $view->exposed_raw_input;
   }
-	$base = $view->base_table;
+  $base = $view->base_table;
   $plaintext_output = $options["plaintext_output"];
   $vars["content_type"] = ($options['content_type'] == 'default') ? 'text/html' : $options['content_type'];
   $header  = $options["header"];
   if (!$vars["header"]) {
-  	$vars["title"] = check_plain(($view->get_title() ? $view->get_title(): $view->name));
-  	$vars["id"] = check_url($view->get_url());
-  	$vars["author"] = _views_xhtml_format_author($options["author"]);
+    $vars["title"] = check_plain(($view->get_title() ? $view->get_title(): $view->name));
+    $vars["id"] = check_url($view->get_url());
+    $vars["author"] = _views_xhtml_format_author($options["author"]);
     $vars['link'] = check_url(url($view->display_handler->get_path(), $url_options));
   } else $vars["header"] = $header;
-	$hcalendars = array();
+  $hcalendars = array();
   foreach($rows as $row) {
-  	//_views_rdf_debug_stop($row);
-  	$hcalendar = array();
-  	foreach ($row as $field) {
-  	  if ($options["field_output"] == "normal") {
-  	  	if ($field->label)
-  	  	  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
-  	  	else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	    if (!$field->is_multiple) 
-		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
-		    else {		    	
-		    	$content = array();
-		    	foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
-		    	$content = implode(" ", $content);
-		    }  	  	    	  	    	  	
-  	  }
-  	  elseif ($options["field_output"] == "raw") {
-  	  	$label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	    if (!$field->is_multiple) 
-		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
-		    else { 
-		      $content = array();
-		      foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
-		      $content = implode(" ", $content);
-		    }  	  	  	    	  	  	  	
-  	  }
-  	  $label = _views_xml_strip_illegal_xml_name_chars(html_entity_decode(check_plain(strip_tags($label))));
-  	  $content = (($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>": $content);  	
+    //_views_rdf_debug_stop($row);
+    $hcalendar = array();
+    foreach ($row as $field) {
+      if ($options["field_output"] == "normal") {
+        if ($field->label)
+          $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
+        else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+        if (!$field->is_multiple)
+          $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+        else {
+          $content = array();
+          foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+          $content = implode(" ", $content);
+        }
+      }
+      elseif ($options["field_output"] == "raw") {
+        $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+        if (!$field->is_multiple)
+          $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
+        else {
+          $content = array();
+          foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+          $content = implode(" ", $content);
+        }
+      }
+      $label = _views_xml_strip_illegal_xml_name_chars(html_entity_decode(check_plain(strip_tags($label))));
+      $content = (($options['escape_as_CDATA'] == 'yes') ? "<![CDATA[$content]]>": $content);
       if (stripos($label, 'class') !== FALSE) {
         $hcalendar['class'] = $content;
       }
@@ -304,10 +304,10 @@ function template_preprocess_views_views_xhtml_style_hcalendar($vars) {
       }
       if (stripos($label, 'country_name') !== FALSE) {
         $hcalendar['adr']['country-name'] = $content;
-      }  	
-  	} 
-  	$hcalendars[] = $hcalendar;
+      }
+    }
+    $hcalendars[] = $hcalendar;
   }//for
-  $vars["hcalendars"] = $hcalendars;  
+  $vars["hcalendars"] = $hcalendars;
 }
 

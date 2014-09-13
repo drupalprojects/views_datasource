@@ -5,7 +5,7 @@
  * View template to render view fields as rdf.
  *
  * - $view: The view in use.
- * - $rows: Array of row objects as rendered by _views_json_render_fields 
+ * - $rows: Array of row objects as rendered by _views_json_render_fields
  * - $attachment: not used currently
  * - $options: The options for the style passed in from the UI.
  *
@@ -18,9 +18,9 @@
  * @param $vars
  * @return unknown_type
  */
-function template_preprocess_views_views_rdf_style_foaf($vars) {
-	global $user;
-	global $base_url; 
+function template_preprocess_views_views_rdf_style_foaf(&$vars) {
+  global $user;
+  global $base_url;
   $view = $vars["view"];
   $rows = $vars["rows"];
   $options = $vars["options"];
@@ -29,47 +29,47 @@ function template_preprocess_views_views_rdf_style_foaf($vars) {
   if (!empty($view->exposed_raw_input)) {
     $url_options['query'] = $view->exposed_raw_input;
   }
-	$base = $view->base_table;
+  $base = $view->base_table;
   $root = "feed";
   $plaintext_output = $options["plaintext_output"];
   $vars["content_type"] = ($options['content_type'] == 'default') ? 'application/atom+rdf' : $options['content_type'];
   $header  = $options["header"];
   if (!$vars["header"]) {
-  	$vars["title"] = check_plain(($view->get_title() ? $view->get_title(): $view->name));
-  	$vars["id"] = check_url($view->get_url());
-  	$vars["updated"] = format_date(time(), 'custom', DATE_ATOM);
-  	$vars["author"] = _views_rdf_format_author($options["author"]);
+    $vars["title"] = check_plain(($view->get_title() ? $view->get_title(): $view->name));
+    $vars["id"] = check_url($view->get_url());
+    $vars["updated"] = format_date(time(), 'custom', DATE_ATOM);
+    $vars["author"] = _views_rdf_format_author($options["author"]);
     $vars['link'] = check_url(url($view->display_handler->get_path(), $url_options));
   } else $vars["header"] = $header;
-	$persons = array();
+  $persons = array();
   foreach($rows as $row) {
-  	$person = array();
-  	foreach ($row as $field) {
-  		//_views_rdf_debug_stop($row);
-  	  if ($options["field_output"] == "normal") {
-  	  	if ($field->label)
-  	  	  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
-  	  	else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	if (!$field->is_multiple) 
-		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
-		    else {		    	
-		    	$content = array();
-		    	foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
-		    	$content = implode(" ", $content);
-		    }  	  	    	  	  
-  	  }
-  	  elseif ($options["field_output"] == "raw") {
-  	  	$label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	    if (!$field->is_multiple) 
-		      $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
-		    else { 
-		      $content = array();
-		      foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
-		      $content = implode(" ", $content);
-		    }  	  	  	  
-  	  }
-  	  //if (($options["skip_empty_fields"] == TRUE) && (is_null($content) || $content === "")) continue;  	  
-  	  if (stripos($label, 'firstname') !== FALSE) {
+    $person = array();
+    foreach ($row as $field) {
+      //_views_rdf_debug_stop($row);
+      if ($options["field_output"] == "normal") {
+        if ($field->label)
+          $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
+        else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+        if (!$field->is_multiple)
+          $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+        else {
+          $content = array();
+          foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+          $content = implode(" ", $content);
+        }
+      }
+      elseif ($options["field_output"] == "raw") {
+        $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+        if (!$field->is_multiple)
+          $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
+        else {
+          $content = array();
+          foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+          $content = implode(" ", $content);
+        }
+      }
+      //if (($options["skip_empty_fields"] == TRUE) && (is_null($content) || $content === "")) continue;
+      if (stripos($label, 'firstname') !== FALSE) {
         $person["firstName"] = check_plain($content);
         continue;
       }
@@ -78,7 +78,7 @@ function template_preprocess_views_views_rdf_style_foaf($vars) {
         continue;
       }
       if ((stripos($label, 'name') !== FALSE) && ((!stripos($label, 'firstname')) && (!stripos($label, 'surname')))) {
-      	$person["name"] = check_plain($content);
+        $person["name"] = check_plain($content);
         continue;
       }
       if (stripos($label, 'title') !== FALSE) {
@@ -94,7 +94,7 @@ function template_preprocess_views_views_rdf_style_foaf($vars) {
         continue;
       }
       if (((stripos($label, 'mail') !== FALSE) || (stripos($label, 'email') !== FALSE)) && (!array_key_exists('mbox', $person))) {
-      	//_views_rdf_debug_stop($label);
+        //_views_rdf_debug_stop($label);
         $person["mbox"] = check_plain($content);
         $person["mbox_sha1sum"] = md5("mailto:". check_plain($content));
         continue;
@@ -153,10 +153,10 @@ function template_preprocess_views_views_rdf_style_foaf($vars) {
         $person["yahooChatID"] = check_plain($content);
         continue;
       }
-    }  	
-	  $persons[] = $person; 
+    }
+    $persons[] = $person;
   }//for
-  $vars["persons"] = $persons;  
+  $vars["persons"] = $persons;
 }
 
 /**
@@ -164,8 +164,8 @@ function template_preprocess_views_views_rdf_style_foaf($vars) {
  * @param $vars
  * @return unknown_type
  */
-function template_preprocess_views_views_rdf_style_sioc($vars) {
-	global $base_url; 
+function template_preprocess_views_views_rdf_style_sioc(&$vars) {
+  global $base_url;
   $view = $vars["view"];
   $rows = $vars["rows"];
   $options = $vars["options"];
@@ -174,46 +174,46 @@ function template_preprocess_views_views_rdf_style_sioc($vars) {
   if (!empty($view->exposed_raw_input)) {
     $url_options['query'] = $view->exposed_raw_input;
   }
-	$base = $view->base_table;
+  $base = $view->base_table;
   $plaintext_output = $options["plaintext_output"];
   $vars["content_type"] = ($options['content_type'] == 'default') ? 'application/atom+rdf' : $options['content_type'];
   $header  = $options["header"];
   if (!$vars["header"]) {
-  	$vars["title"] = check_plain(($view->get_title() ? $view->get_title(): $view->name));
-  	$vars["id"] = check_url($view->get_url());
-  	$vars["updated"] = format_date(time(), 'custom', DATE_ATOM);
-  	$vars["author"] = _views_rdf_format_author($options["author"]);
+    $vars["title"] = check_plain(($view->get_title() ? $view->get_title(): $view->name));
+    $vars["id"] = check_url($view->get_url());
+    $vars["updated"] = format_date(time(), 'custom', DATE_ATOM);
+    $vars["author"] = _views_rdf_format_author($options["author"]);
     $vars['link'] = check_url(url($view->display_handler->get_path(), $url_options));
   } else $vars["header"] = $header;
   $users = array();
   $nodes = array();
   if ($base == "users") {
-  	foreach ($rows as $row) {
-  		$user = array();
-  		foreach($row as $field) {
-  	    if ($options["field_output"] == "normal") {
-  	  	  if ($field->label)
-  	  	    $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
-  	  	  else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	  if (!$field->is_multiple) 
-		        $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
-		      else {		    	
-		    	  $content = array();
-		    	  foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
-		    	  $content = implode(" ", $content);
-		      }  
-  	    }
-  	    elseif ($options["field_output"] == "raw") {
-  	  	  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	      if (!$field->is_multiple) 
-		        $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
-		      else { 
-		        $content = array();
-		        foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
-		        $content = implode(" ", $content);
-		      }  	
-  	    }
-  		  if ((drupal_strtolower($label) == 'id') || (drupal_strtolower($label) == 'uid') && (!array_key_exists("uid", $user))) {
+    foreach ($rows as $row) {
+      $user = array();
+      foreach($row as $field) {
+        if ($options["field_output"] == "normal") {
+          if ($field->label)
+            $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
+          else  $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+          if (!$field->is_multiple)
+            $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+          else {
+            $content = array();
+            foreach($field->content as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+            $content = implode(" ", $content);
+          }
+        }
+        elseif ($options["field_output"] == "raw") {
+          $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+          if (!$field->is_multiple)
+            $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->raw;
+          else {
+            $content = array();
+            foreach($field->raw as $n=>$oc) $content[$n] = $plaintext_output ? check_plain(html_entity_decode(strip_tags($oc))) : $oc;
+            $content = implode(" ", $content);
+          }
+        }
+        if ((drupal_strtolower($label) == 'id') || (drupal_strtolower($label) == 'uid') && (!array_key_exists("uid", $user))) {
           $user["uid"] = $content;
           continue;
         }
@@ -224,176 +224,176 @@ function template_preprocess_views_views_rdf_style_sioc($vars) {
         if ((drupal_strtolower($label) == 'mail') ||(drupal_strtolower($label) == 'email') || (drupal_strtolower($label) == 'users_mail') && (!array_key_exists("email", $user))) {
           $user["mail"] = $content;
           continue;
-        }  	     
-  	  }
-  	  $users[] = $user;
-  	}	
-  }    
+        }
+      }
+      $users[] = $user;
+    }
+  }
   if ($base == 'node') {
-    foreach ($rows as $row) {    
+    foreach ($rows as $row) {
       $node = array();
       foreach($row as $field) {
-  	    if ($options["field_output"] == "normal") {
-  	      if ($field->label) 
-  	        $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
-  	  	  else  
-  	  	    $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
-  	  	  $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
-  	    }
-  	    /* rdf:ID */			
-  	    if (!array_key_exists("id", $node)) {
-			    if (drupal_strtolower($label) == "id") {
-	  	      $node["id"] = $content;
-	  	      continue;
-	        }
-	  	  }
-	  	
+        if ($options["field_output"] == "normal") {
+          if ($field->label)
+            $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->label))) : $field->label;
+          else
+            $label = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->id))) : $field->id;
+          $content = $plaintext_output ? check_plain(html_entity_decode(strip_tags($field->content))) : $field->content;
+        }
+        /* rdf:ID */
+        if (!array_key_exists("id", $node)) {
+          if (drupal_strtolower($label) == "id") {
+            $node["id"] = $content;
+            continue;
+          }
+        }
+
         /*use nid for rdf:ID if none specified*/
-	  	  if (!array_key_exists("id", $node)) {
-			    if (drupal_strtolower($label) == "nid") {
-	  	      $node["id"] = $content;
-	  	      continue;
-	        }
-	  	  }
-	  	
+        if (!array_key_exists("id", $node)) {
+          if (drupal_strtolower($label) == "nid") {
+            $node["id"] = $content;
+            continue;
+          }
+        }
+
         /* RDF:created*/
-	  	  if (!array_key_exists("created", $node)) {
-			    if (drupal_strtolower($label) == "created") {
-	  	      $node["created"] = $content;
-	  	      continue;
-	        }
-	  	  }	  	
-	  	
-  	    /* rdf:created */			
-  	    if (!array_key_exists("created", $node)) {
-			    if((drupal_strtolower($label) == "node_created") || (drupal_strtolower($label) == "post date")){
-			    	//_views_rdf_debug_stop("created");
-	  	      $node["created"] = $content;
-	  	      continue;
-	        }
-	  	  }
-	  	
+        if (!array_key_exists("created", $node)) {
+          if (drupal_strtolower($label) == "created") {
+            $node["created"] = $content;
+            continue;
+          }
+        }
+
+        /* rdf:created */
+        if (!array_key_exists("created", $node)) {
+          if((drupal_strtolower($label) == "node_created") || (drupal_strtolower($label) == "post date")){
+            //_views_rdf_debug_stop("created");
+            $node["created"] = $content;
+            continue;
+          }
+        }
+
         /* rdf:type */
-	  	  if (!array_key_exists("type", $node)) {
-			    if (drupal_strtolower($label) == "type") {
-	  	      $node["type"] = $content;
-	  	      continue;
-	        }
-	  	  }	  	
-	  	
-  	    /* rdf:type */			
-  	    if (!array_key_exists("type", $node)) {
-			    if (drupal_strtolower($label) == "node_type") {
-	  	      $node["type"] = $content;
-	  	      continue;
-	        }
-	  	  }
+        if (!array_key_exists("type", $node)) {
+          if (drupal_strtolower($label) == "type") {
+            $node["type"] = $content;
+            continue;
+          }
+        }
+
+        /* rdf:type */
+        if (!array_key_exists("type", $node)) {
+          if (drupal_strtolower($label) == "node_type") {
+            $node["type"] = $content;
+            continue;
+          }
+        }
 
         /* rdf:changed */
-	  	  if (!array_key_exists("changed", $node)) {
-			    if (drupal_strtolower($label) == "changed") {
-	  	      $node["changed"] = $content;
-	  	      continue;
-	        }
-	  	  }	  	
-	  	
-  	    /* use updatedcommented if no changed*/			
-  	      if (!array_key_exists("changed", $node)) {
-			      if ((drupal_strtolower($label) == "updated/commented date")) {
-	  	      $node["changed"] = $content;
-	  	      continue;
-	        }
-	  	  }
-	  	  
-        /* use node_changed if no changed*/			
-  	      if (!array_key_exists("changed", $node)) {
-			      if ((drupal_strtolower($label) == "node_changed")) {
-	  	      $node["changed"] = $content;
-	  	      continue;
-	        }
-	  	  }	  	  
+        if (!array_key_exists("changed", $node)) {
+          if (drupal_strtolower($label) == "changed") {
+            $node["changed"] = $content;
+            continue;
+          }
+        }
+
+        /* use updatedcommented if no changed*/
+          if (!array_key_exists("changed", $node)) {
+            if ((drupal_strtolower($label) == "updated/commented date")) {
+            $node["changed"] = $content;
+            continue;
+          }
+        }
+
+        /* use node_changed if no changed*/
+          if (!array_key_exists("changed", $node)) {
+            if ((drupal_strtolower($label) == "node_changed")) {
+            $node["changed"] = $content;
+            continue;
+          }
+        }
 
         /* rdf:last updated */
-	  	  if (!array_key_exists("last_updated", $node)) {
-			    if (drupal_strtolower($label) == "last_updated") {
-	  	      $node["last_updated"] = $content;
-	  	      continue;
-	        }
-	  	  }
+        if (!array_key_exists("last_updated", $node)) {
+          if (drupal_strtolower($label) == "last_updated") {
+            $node["last_updated"] = $content;
+            continue;
+          }
+        }
 
         /* use lastupdateddate if no  last_updated */
-	  	  if (!array_key_exists("last_updated", $node)) {
-			    if ((drupal_strtolower($label) == "updated date")){
-	  	      $node["last_updated"] = $content;
-	  	      continue;
-	        }
-	  	  }	  	
-	  	
-	  	
-  	    /* rdf:title */			
-  	    if (!array_key_exists("title", $node)) {
-			    if (drupal_strtolower($label) == "title") {
-	  	      $node["title"] = $content;
-	  	      continue;
-	        }
-	  	  }	  	
-	  	
-	  		  	
-  	    /* rdf title attribute */			
-  	    if (!array_key_exists("title", $node)) {
-			    if (drupal_strtolower($label) == "node_title") {
-	  	      $node["title"] = $content;
-	  	      continue;
-	        }
-	  	  }
+        if (!array_key_exists("last_updated", $node)) {
+          if ((drupal_strtolower($label) == "updated date")){
+            $node["last_updated"] = $content;
+            continue;
+          }
+        }
 
-	  	  /* rdf body */
-	  	  if (!array_key_exists("body", $node)) {
-	        if (drupal_strtolower($label) == "body") {
-	      	  $node["body"] = $content;
-	        }
-	  	  }
 
-	  	  /* try node_revisions_body */
-	  	  if (!array_key_exists("body", $node)) {
-	        if (drupal_strtolower($label) == "node_revisions_body") {
-	      	  $node["body"] = $content;
-	        }
-	  	  }
-	  	  
-	  	  /* rdf uid */
-	  	  if (!array_key_exists("uid", $node)) {
-	        if (drupal_strtolower($label) == "uid") {
-	      	  $node["uid"] = $content;
-	        }
-	  	  }
-	  	  
-      	/* try users_uid for uid*/
-	  	  if (!array_key_exists("uid", $node)) {
-	        if (drupal_strtolower($label) == "users_uid") {
-	      	  $node["uid"] = $content;
-	        }
-	  	  }	
+        /* rdf:title */
+        if (!array_key_exists("title", $node)) {
+          if (drupal_strtolower($label) == "title") {
+            $node["title"] = $content;
+            continue;
+          }
+        }
+
+
+        /* rdf title attribute */
+        if (!array_key_exists("title", $node)) {
+          if (drupal_strtolower($label) == "node_title") {
+            $node["title"] = $content;
+            continue;
+          }
+        }
+
+        /* rdf body */
+        if (!array_key_exists("body", $node)) {
+          if (drupal_strtolower($label) == "body") {
+            $node["body"] = $content;
+          }
+        }
+
+        /* try node_revisions_body */
+        if (!array_key_exists("body", $node)) {
+          if (drupal_strtolower($label) == "node_revisions_body") {
+            $node["body"] = $content;
+          }
+        }
+
+        /* rdf uid */
+        if (!array_key_exists("uid", $node)) {
+          if (drupal_strtolower($label) == "uid") {
+            $node["uid"] = $content;
+          }
+        }
+
+        /* try users_uid for uid*/
+        if (!array_key_exists("uid", $node)) {
+          if (drupal_strtolower($label) == "users_uid") {
+            $node["uid"] = $content;
+          }
+        }
       }
       if (array_key_exists("uid", $node)) {
-	  	  	$user_obj = user_load($node["uid"]);
-	  	  	$user["uid"] = $user_obj->uid;
-	  	  	$user["name"] = $user_obj->name;
-	  	  	$user["mail"] = $user_obj->mail;
-	  	}	  	  
-      if ($node["id"]) {
-      	$nodes[$node["id"]] = $node;
-      	if ($user) $users[$node["id"]] = $user;
+          $user_obj = user_load($node["uid"]);
+          $user["uid"] = $user_obj->uid;
+          $user["name"] = $user_obj->name;
+          $user["mail"] = $user_obj->mail;
       }
-      
+      if ($node["id"]) {
+        $nodes[$node["id"]] = $node;
+        if ($user) $users[$node["id"]] = $user;
+      }
+
     }//for
   }//if
   $vars["nodes"] = $nodes;
   $vars["users"] = $users;
-  
+
   //_views_rdf_debug_stop($nodes);
   //_views_rdf_debug_stop($users);
-  
+
 }
 function _views_rdf_sioc_xml_user_render($user) {
   $xml .="<foaf:Person rdf:about=\"". url('user/'. $user["uid"], array('absolute' => TRUE)) ."\">\n";
@@ -421,8 +421,8 @@ function _views_rdf_sioc_xml_user_render($user) {
 }
 
 function _views_rdf_sioc_xml_story_render($nid, $title, $type, $created, $changed, $last_updated, $uid, $body) {
-	$node_url = url("node/$nid", array('absolute' => TRUE));
-	$xml = "";
+  $node_url = url("node/$nid", array('absolute' => TRUE));
+  $xml = "";
   $xml .= "<sioc:Post rdf:about=\"$node_url\">\n";
   $xml .= "  <dc:title>$title</dc:title>\n";
   $xml .= "  <sioc:content>\n ";
@@ -501,9 +501,9 @@ function _views_rdf_sioc_xml_story_render($nid, $title, $type, $created, $change
  * @param $vars
  * @return none
  */
-function template_preprocess_views_views_rdf_style_doap($vars) {
+function template_preprocess_views_views_rdf_style_doap(&$vars) {
   global $user;
-  global $base_url; 
+  global $base_url;
   $view = $vars["view"];
   $rows = $vars["rows"];
   $options = $vars["options"];
