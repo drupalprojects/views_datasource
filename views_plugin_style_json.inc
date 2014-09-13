@@ -92,7 +92,7 @@ class views_plugin_style_json extends views_plugin_style {
       '#type'           => 'checkbox',
       '#title'          => ('Views API mode'),
       '#default_value'  => $this->options['using_views_api_mode'],
-      '#description'    => ('Not using View API mode means the JSON gets output directly and the server ceases normal page processing.  Using it means the server does not cease processing after outputting the JSON.  This allows the Views API to be used with the view without having to prematurely terminate page processing.'),
+      '#description' => t('With Views API mode the JSON will embedded as normal content so normal page processing is used. Leave it unchecked when JSON should be printed directly to the client.'),
     );
   }
 
