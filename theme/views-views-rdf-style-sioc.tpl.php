@@ -6,7 +6,7 @@
  * Variables:
  * - $view: The View object.
  * - $rows: Array of row objects as rendered by _views_xml_render_fields
- * - $nodes, $users Array of user and node objects created by template_preprocess_views_views_rdf_style_sioc 
+ * - $nodes, $users Array of user and node objects created by template_preprocess_views_views_rdf_style_sioc
  *
  * @ingroup views_templates
  */
@@ -71,37 +71,37 @@ if ($users) {
        $xml .="    </sioc:User>\n";
        $xml .="  </foaf:holdsAccount>\n";
        $xml .="</foaf:Person>\n";
-    }  
+    }
   }
 }
- 
+
  if ($nodes) {
- 	$users_xml = "";
- 	$nodes_xml = "";
- 	$users_done = array();
- 	$count = 0;
- 	foreach($nodes as $node) {
- 		
- 		if ((array_key_exists("id", $node)) && (array_key_exists("title", $node)) && (array_key_exists("type", $node)) 
- 		  && (array_key_exists("created", $node)) && (array_key_exists("changed", $node)) && (array_key_exists("last_updated", $node)) 
- 		  && (array_key_exists("uid", $node)) && (array_key_exists("body", $node))) {
- 		  if (array_key_exists($node["id"], $users) && (!array_key_exists($node["uid"], $users_done))) {
- 		  	$user = $users[$node["id"]];
- 		  	$users_done[$node["uid"]] = $user;
- 		  	$users_xml .=  _views_rdf_sioc_xml_user_render($user);
- 		  }
-      $nodes_xml .= _views_rdf_sioc_xml_story_render($node["id"], $node["title"], $node["type"], $node["created"], $node["changed"], $node["last_updated"], $node["uid"], $node["body"]); 		  
+  $users_xml = "";
+  $nodes_xml = "";
+  $users_done = array();
+  $count = 0;
+  foreach($nodes as $node) {
+
+    if ((array_key_exists("id", $node)) && (array_key_exists("title", $node)) && (array_key_exists("type", $node))
+      && (array_key_exists("created", $node)) && (array_key_exists("changed", $node)) && (array_key_exists("last_updated", $node))
+      && (array_key_exists("uid", $node)) && (array_key_exists("body", $node))) {
+      if (array_key_exists($node["id"], $users) && (!array_key_exists($node["uid"], $users_done))) {
+        $user = $users[$node["id"]];
+        $users_done[$node["uid"]] = $user;
+        $users_xml .=  _views_rdf_sioc_xml_user_render($user);
+      }
+      $nodes_xml .= _views_rdf_sioc_xml_story_render($node["id"], $node["title"], $node["type"], $node["created"], $node["changed"], $node["last_updated"], $node["uid"], $node["body"]);
     }
     else {
-    	$nid = $node["id"];
-    	$nodes_xml .= "<missing> node $nid is missing one or more of the id, title, type, created, changed, last_updated, uid, or body attributes.</missing>";
+      $nid = $node["id"];
+      $nodes_xml .= "<missing> node $nid is missing one or more of the id, title, type, created, changed, last_updated, uid, or body attributes.</missing>";
 //      if ($view->override_path)
 //        print '<b style="color:red">One of the id, title, type, created, changed, lasty_updated, uid, and body attributes is missing.</b>';
 //      elseif ($options['using_views_api_mode'])
-//        print "One of the id, title, type, created, changed, lasty_updated, uid, and body attributes is missing.";   
+//        print "One of the id, title, type, created, changed, lasty_updated, uid, and body attributes is missing.";
 //      else drupal_set_message(t('One of the id, title, type, created, changed, lasty_updated, uid, and body attributes is missing.'), 'error');
 //      return;
-    }    
+    }
   }//for
 }//if
  $xml .= $users_xml.$nodes_xml;
@@ -113,7 +113,8 @@ if ($users) {
     print $xml;
   }
   else {
-  	drupal_set_header("Content-Type: $content_type; charset=utf-8");
+    drupal_set_header("Content-Type: $content_type; charset=utf-8");
     print $xml;
+    drupal_page_footer();
     exit;
-  }   
+  }

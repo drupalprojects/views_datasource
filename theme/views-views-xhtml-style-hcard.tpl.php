@@ -6,25 +6,25 @@
  * Variables:
  * - $view: The View object.
  * - $rows: Array of row objects as rendered by _views_xml_render_fields
- * - $hcards Array of hcard arrays as created by template_preprocess_views_views_xhtml_style_hcard 
+ * - $hcards Array of hcard arrays as created by template_preprocess_views_views_xhtml_style_hcard
  *
  * @ingroup views_templates
  */
-  
+
   $xhtml .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'."\n";
   $xhtml .= '<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr"'.">\r\n";
   $xhtml .= '<head>'."\r\n";
   if (!$header) { //build our own header
     $xhtml .= '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'."\r\n";
     $xhtml .= '  <meta name="KEYWORDS" content="hCards" />'."\r\n";
-    $xhtml .= '  <title>hCards</title>'."\r\n";     
+    $xhtml .= '  <title>hCards</title>'."\r\n";
     $xhtml .= "<meta http-equiv=\"Content-Type\" content=$content_type; charset=utf-8/>\r\n";
     $xhtml .= '  <meta name="KEYWORDS" content="hCards" />'."\r\n";
     $xhtml .= '  <title>hCards</title>'."\r\n";
     }
-  else {  
+  else {
     $xhtml .= "  $header\n";
-  }  
+  }
   $xhtml .= '</head>'."\r\n";
   $xhtml .= '<body>'."\r\n";
   foreach($hcards as $hcard) {
@@ -113,7 +113,7 @@
     $xhtml .= '</div>'."\r\n";
   }
   $xhtml .= '</body>'."\r\n";
-  $xhtml .= '</html>'."\r\n";	
+  $xhtml .= '</html>'."\r\n";
   if ($view->override_path) {       // inside live preview
     print htmlspecialchars($xhtml);
   }
@@ -121,7 +121,8 @@
     print $xhtml;
   }
   else {
-  	drupal_set_header("Content-Type: $content_type; charset=utf-8");
+    drupal_set_header("Content-Type: $content_type; charset=utf-8");
     print $xhtml;
+    drupal_page_footer();
     exit;
-  }  
+  }
